@@ -36,8 +36,8 @@ export class NetCDF4 extends Group {
                 await this.mountMemoryData();
             }
 
-            // Auto-open file if filename provided
-            if (this.filename) {
+            // Auto-open file if filename provided (including empty strings which should error)
+            if (this.filename !== undefined && this.filename !== null) {
                 await this.open();
             }
         } catch (error) {
@@ -47,7 +47,7 @@ export class NetCDF4 extends Group {
                 this.module = this.createMockModule();
                 this.initialized = true;
                 
-                if (this.filename) {
+                if (this.filename !== undefined && this.filename !== null) {
                     await this.open();
                 }
             } else {
@@ -94,6 +94,14 @@ export class NetCDF4 extends Group {
         options: DatasetOptions = {},
         filename?: string
     ): Promise<NetCDF4> {
+        if (!data) {
+            throw new Error('Data cannot be null or undefined');
+        }
+        
+        if (!(data instanceof ArrayBuffer) && !(data instanceof Uint8Array)) {
+            throw new Error('Data must be ArrayBuffer or Uint8Array');
+        }
+        
         const uint8Data = data instanceof ArrayBuffer ? new Uint8Array(data) : data;
         const virtualFilename = filename || `/tmp/netcdf_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.nc`;
         
@@ -286,8 +294,8 @@ export class NetCDF4 extends Group {
 
         return {
             nc_open: (path: string, mode: number) => {
-                // Mock implementation that simulates unsupported modes
-                if (path.includes('unsupported') || !['r', 'w', 'a'].some(m => this.mode.includes(m))) {
+                // Mock implementation that simulates invalid filenames and unsupported modes
+                if (!path || path.trim() === '' || path.includes('unsupported') || !['r', 'w', 'a'].some(m => this.mode.includes(m))) {
                     return { result: -1, ncid: -1 };
                 }
                 // For reading mode, file should exist in mock storage, otherwise create a minimal entry
@@ -335,17 +343,21 @@ export class NetCDF4 extends Group {
                         data: new Float64Array(0),
                         attributes: {}
                     };
+                    // Return varid based on current variable count (1-based)
+                    const varCount = Object.keys(mockFiles[this.filename].variables).length;
+                    return { result: NC_CONSTANTS.NC_NOERR, varid: varCount };
                 }
                 return { result: NC_CONSTANTS.NC_NOERR, varid: 1 };
             },
             nc_put_var_double: (ncid: number, varid: number, data: Float64Array) => {
-                // Store data in mock file - find the variable by ID and store data
+                // Store data in mock file - try to map varid to variable name
                 if (this.filename && mockFiles[this.filename]) {
                     const variables = mockFiles[this.filename].variables;
-                    // For simplicity, assume varid 1 corresponds to the first variable
                     const varNames = Object.keys(variables);
-                    if (varNames.length > 0 && varid === 1) {
-                        const varName = varNames[0]; // Use first variable for now
+                    
+                    // Map varid to variable name (1-based indexing)
+                    if (varNames.length > 0 && varid >= 1 && varid <= varNames.length) {
+                        const varName = varNames[varid - 1]; // Convert to 0-based
                         variables[varName].data = new Float64Array(data);
                     }
                 }
@@ -356,8 +368,10 @@ export class NetCDF4 extends Group {
                 if (this.filename && mockFiles[this.filename]) {
                     const variables = mockFiles[this.filename].variables;
                     const varNames = Object.keys(variables);
-                    if (varNames.length > 0 && varid === 1) {
-                        const varName = varNames[0]; // Use first variable for now
+                    
+                    // Map varid to variable name (1-based indexing)
+                    if (varNames.length > 0 && varid >= 1 && varid <= varNames.length) {
+                        const varName = varNames[varid - 1]; // Convert to 0-based
                         const storedData = variables[varName].data;
                         if (storedData && storedData.length > 0) {
                             // Return the stored data, resized to requested size if needed

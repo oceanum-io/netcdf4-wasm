@@ -251,9 +251,7 @@ describe('Dataset Creation and Basic I/O', () => {
 
         test('should handle file operation errors gracefully', async () => {
             // Test with a clearly invalid path that should fail even in mock mode
-            expect(async () => {
-                await Dataset('', 'r'); // Empty filename should fail
-            }).rejects.toThrow();
+            await expect(Dataset('', 'r')).rejects.toThrow();
         });
     });
 
