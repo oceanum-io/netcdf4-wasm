@@ -26,7 +26,7 @@
     "emscripten",
     "scientific-computing"
   ],
-  "author": "",
+  "author": "Oceanum.io",
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^29.0.0",
@@ -42,6 +42,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/netcdf4-wasm.git"
+    "url": "git+https://github.com/oceanum-io/netcdf4-wasm.git"
+  },
+  "homepage": "https://oceanum-io.github.io/netcdf4-wasm/",
+  "bugs": {
+    "url": "https://github.com/oceanum-io/netcdf4-wasm/issues"
   }
 }

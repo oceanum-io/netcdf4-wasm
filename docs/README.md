@@ -79,6 +79,16 @@ docs/
 2. Follow the existing pattern for class documentation
 3. Add the page to `api/index.md`
 
+## GitHub Pages Configuration
+
+**Important**: Ensure your GitHub repository is configured to use GitHub Actions for Pages deployment:
+
+1. Go to your repository **Settings** → **Pages**
+2. Under **Source**, select "**GitHub Actions**"
+3. The documentation will be available at `https://yourusername.github.io/netcdf4-wasm/`
+
+The `docs/index.md` file serves as the root page of the documentation site.
+
 ## Deployment
 
 Documentation is automatically deployed to GitHub Pages when:
@@ -88,9 +98,10 @@ Documentation is automatically deployed to GitHub Pages when:
 - A new release is created
 
 The deployment workflow:
-1. Builds the Jekyll site
-2. Uploads the built site to GitHub Pages
-3. Makes it available at the configured GitHub Pages URL
+1. Builds the Jekyll site from the `docs/` directory
+2. Uses `docs/index.md` as the homepage
+3. Uploads the built site to GitHub Pages
+4. Makes it available at the configured GitHub Pages URL
 
 ## Writing Guidelines
 

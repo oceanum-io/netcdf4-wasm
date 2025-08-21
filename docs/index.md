@@ -1,6 +1,7 @@
 ---
-layout: page
+layout: default
 title: netcdf4-wasm Documentation
+description: NetCDF4 library compiled to WebAssembly with JavaScript/TypeScript bindings
 ---
 
 # netcdf4-wasm
@@ -9,7 +10,7 @@ NetCDF4 library compiled to WebAssembly with JavaScript/TypeScript bindings.
 
 ## Overview
 
-netcdf4-wasm brings the power of NetCDF4 to web browsers and Node.js environments through WebAssembly. This library provides a complete implementation of NetCDF4 functionality with a familiar JavaScript/TypeScript API that closely follows the netcdf4-python conventions.
+This library provides a complete implementation of NetCDF4 functionality with a familiar JavaScript/TypeScript API inspired by the netcdf4-python library.
 
 ### Key Features
 
@@ -31,24 +32,24 @@ npm install netcdf4-wasm
 ### Basic Usage
 
 ```javascript
-import { Dataset } from 'netcdf4-wasm';
+import { Dataset } from "netcdf4-wasm";
 
 // Open from file path
-const dataset = await Dataset('data.nc', 'r');
+const dataset = await Dataset("data.nc", "r");
 
 // Or from a Blob (browser file input)
 const file = event.target.files[0]; // File is a Blob
-const dataset = await Dataset(file, 'r');
+const dataset = await Dataset(file, "r");
 
 // Or from ArrayBuffer
-const response = await fetch('data.nc');
+const response = await fetch("data.nc");
 const buffer = await response.arrayBuffer();
-const dataset = await Dataset(buffer, 'r');
+const dataset = await Dataset(buffer, "r");
 
 // Read data
-console.log('Variables:', Object.keys(dataset.variables));
+console.log("Variables:", Object.keys(dataset.variables));
 const temp = await dataset.variables.temperature.getValue();
-console.log('Temperature data:', temp);
+console.log("Temperature data:", temp);
 
 await dataset.close();
 ```
@@ -56,20 +57,24 @@ await dataset.close();
 ### Creating Data
 
 ```javascript
-import { Dataset } from 'netcdf4-wasm';
+import { Dataset } from "netcdf4-wasm";
 
 // Create new dataset in memory
-const dataset = await Dataset(new ArrayBuffer(0), 'w');
+const dataset = await Dataset(new ArrayBuffer(0), "w");
 
 // Add dimensions
-await dataset.createDimension('time', 10);
-await dataset.createDimension('lat', 180);
-await dataset.createDimension('lon', 360);
+await dataset.createDimension("time", 10);
+await dataset.createDimension("lat", 180);
+await dataset.createDimension("lon", 360);
 
 // Add variables
-const temp = await dataset.createVariable('temperature', 'f8', ['time', 'lat', 'lon']);
-temp.units = 'K';
-temp.long_name = 'Air Temperature';
+const temp = await dataset.createVariable("temperature", "f8", [
+  "time",
+  "lat",
+  "lon",
+]);
+temp.units = "K";
+temp.long_name = "Air Temperature";
 
 // Write data
 const data = new Float64Array(10 * 180 * 360);
@@ -84,34 +89,41 @@ await dataset.close();
 ## Documentation Sections
 
 ### [📖 User Guides](guides/)
+
 Step-by-step guides for common tasks and workflows:
-- [Getting Started](guides/getting-started.html)
-- [Installation & Setup](guides/installation.html)
-- [Working with Files](guides/file-operations.html)
-- [Memory-based Operations](guides/memory-operations.html)
-- [Browser Integration](guides/browser-integration.html)
-- [Building from Source](guides/building.html)
+
+- [Getting Started](guides/getting-started/)
+- [Installation & Setup](guides/installation/)
+- [Working with Files](guides/file-operations/)
+- [Memory-based Operations](guides/memory-operations/)
+- [Browser Integration](guides/browser-integration/)
+- [Building from Source](guides/building/)
 
 ### [🔧 API Reference](api/)
+
 Complete API documentation:
-- [Dataset Class](api/dataset.html)
-- [Variable Class](api/variable.html)
-- [Dimension Class](api/dimension.html)
-- [Group Class](api/group.html)
-- [Constants](api/constants.html)
-- [Types](api/types.html)
+
+- [Dataset Class](api/dataset/)
+- [Variable Class](api/variable/)
+- [Dimension Class](api/dimension/)
+- [Group Class](api/group/)
+- [Constants](api/constants/)
+- [Types](api/types/)
 
 ### [💡 Examples](examples/)
+
 Practical examples and use cases:
-- [Basic File Operations](examples/basic-operations.html)
-- [Browser File Handling](examples/browser-files.html)
-- [Data Visualization](examples/data-visualization.html)
-- [Climate Data Processing](examples/climate-data.html)
-- [Advanced Workflows](examples/advanced-workflows.html)
+
+- [Basic File Operations](examples/basic-operations/)
+- [Browser File Handling](examples/browser-files/)
+- [Data Visualization](examples/data-visualization/)
+- [Climate Data Processing](examples/climate-data/)
+- [Advanced Workflows](examples/advanced-workflows/)
 
 ## Compatibility
 
 ### NetCDF Version Support
+
 - NetCDF4 (HDF5-based) ✅
 - NetCDF3 (classic format) ✅
 - Groups and hierarchies ✅
@@ -119,12 +131,14 @@ Practical examples and use cases:
 - Compression ✅
 
 ### Browser Support
+
 - Chrome 57+ ✅
 - Firefox 52+ ✅
 - Safari 11+ ✅
 - Edge 16+ ✅
 
 ### Node.js Support
+
 - Node.js 14+ ✅
 - ES Modules ✅
 - CommonJS ✅
@@ -154,4 +168,4 @@ We welcome contributions! Please see our [contributing guidelines](https://githu
 
 ---
 
-*netcdf4-wasm is built on the NetCDF4 C library. For more information about NetCDF, visit [Unidata's NetCDF documentation](https://docs.unidata.ucar.edu/netcdf-c/current/).*
+_netcdf4-wasm is built on the NetCDF4 C library. For more information about NetCDF, visit [Unidata's NetCDF documentation](https://docs.unidata.ucar.edu/netcdf-c/current/)._

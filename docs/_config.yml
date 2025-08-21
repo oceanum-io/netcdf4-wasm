@@ -6,6 +6,12 @@ description: NetCDF4 library compiled to WebAssembly with JavaScript/TypeScript 
 baseurl: "" # Set by GitHub Actions automatically
 url: "" # Set by GitHub Actions automatically
 
+# GitHub Pages settings
+repository: yourusername/netcdf4-wasm
+github:
+  owner_name: yourusername
+  repository_name: netcdf4-wasm
+
 # Build settings
 markdown: kramdown
 highlighter: rouge
