@@ -92,33 +92,33 @@ await dataset.close();
 
 Step-by-step guides for common tasks and workflows:
 
-- [Getting Started](guides/getting-started/)
-- [Installation & Setup](guides/installation/)
-- [Working with Files](guides/file-operations/)
-- [Memory-based Operations](guides/memory-operations/)
-- [Browser Integration](guides/browser-integration/)
-- [Building from Source](guides/building/)
+- [Getting Started](guides/getting-started)
+- Installation & Setup *(coming soon)*
+- Working with Files *(coming soon)*
+- Memory-based Operations *(coming soon)*
+- Browser Integration *(coming soon)*
+- Building from Source *(coming soon)*
 
 ### [🔧 API Reference](api/)
 
 Complete API documentation:
 
-- [Dataset Class](api/dataset/)
-- [Variable Class](api/variable/)
-- [Dimension Class](api/dimension/)
-- [Group Class](api/group/)
-- [Constants](api/constants/)
-- [Types](api/types/)
+- [Dataset Class](api/dataset)
+- [Variable Class](api/variable)
+- Dimension Class *(coming soon)*
+- Group Class *(coming soon)*
+- Constants *(coming soon)*
+- Types *(coming soon)*
 
 ### [💡 Examples](examples/)
 
 Practical examples and use cases:
 
-- [Basic File Operations](examples/basic-operations/)
-- [Browser File Handling](examples/browser-files/)
-- [Data Visualization](examples/data-visualization/)
-- [Climate Data Processing](examples/climate-data/)
-- [Advanced Workflows](examples/advanced-workflows/)
+- Basic File Operations *(coming soon)*
+- [Browser File Handling](examples/browser-files)
+- Data Visualization *(coming soon)*
+- Climate Data Processing *(coming soon)*
+- Advanced Workflows *(coming soon)*
 
 ## Compatibility
 
@@ -154,17 +154,17 @@ netcdf4-wasm is optimized for performance:
 
 ## Community & Support
 
-- **GitHub**: [Issues and discussions](https://github.com/yourusername/netcdf4-wasm)
+- **GitHub**: [Issues and discussions](https://github.com/oceanum-io/netcdf4-wasm)
 - **Documentation**: This site (updated with each release)
 - **Examples**: Complete example code in the repository
 
 ## License
 
-MIT License - see [LICENSE](https://github.com/yourusername/netcdf4-wasm/blob/main/LICENSE) for details.
+MIT License - see [LICENSE](https://github.com/oceanum-io/netcdf4-wasm/blob/main/LICENSE) for details.
 
 ## Contributing
 
-We welcome contributions! Please see our [contributing guidelines](https://github.com/yourusername/netcdf4-wasm/blob/main/CONTRIBUTING.md) for details on how to get started.
+We welcome contributions! Please see our [contributing guidelines](https://github.com/oceanum-io/netcdf4-wasm/blob/main/CONTRIBUTING.md) for details on how to get started.
 
 ---
 

@@ -9,45 +9,45 @@ Practical examples demonstrating netcdf4-wasm capabilities in real-world scenari
 
 ## Basic Operations
 
-- [**File I/O Basics**](basic-operations.html) - Opening, reading, and writing NetCDF files
-- [**Creating Datasets**](creating-datasets.html) - Building NetCDF files from scratch
-- [**Reading Data**](reading-data.html) - Accessing variables and metadata
-- [**Data Manipulation**](data-manipulation.html) - Processing and transforming data
+- **File I/O Basics** *(coming soon)* - Opening, reading, and writing NetCDF files
+- **Creating Datasets** *(coming soon)* - Building NetCDF files from scratch
+- **Reading Data** *(coming soon)* - Accessing variables and metadata
+- **Data Manipulation** *(coming soon)* - Processing and transforming data
 
 ## Browser Integration
 
-- [**File Input Handling**](browser-files.html) - Working with HTML file inputs
-- [**Fetch and Load**](fetch-load.html) - Loading remote NetCDF files
-- [**Download and Export**](download-export.html) - Exporting data as files
-- [**Drag and Drop**](drag-drop.html) - Advanced file handling
+- [**File Input Handling**](browser-files) - Working with HTML file inputs
+- **Fetch and Load** *(coming soon)* - Loading remote NetCDF files
+- **Download and Export** *(coming soon)* - Exporting data as files
+- **Drag and Drop** *(coming soon)* - Advanced file handling
 
 ## Data Visualization
 
-- [**Plotting with Chart.js**](chartjs-plotting.html) - Creating interactive charts
-- [**Leaflet Maps**](leaflet-maps.html) - Geospatial data visualization
-- [**D3.js Integration**](d3-visualization.html) - Custom visualizations
-- [**Three.js 3D Plots**](threejs-3d.html) - 3D data visualization
+- **Plotting with Chart.js** *(coming soon)* - Creating interactive charts
+- **Leaflet Maps** *(coming soon)* - Geospatial data visualization
+- **D3.js Integration** *(coming soon)* - Custom visualizations
+- **Three.js 3D Plots** *(coming soon)* - 3D data visualization
 
 ## Scientific Applications
 
-- [**Climate Data Processing**](climate-data.html) - Working with meteorological data
-- [**Time Series Analysis**](time-series.html) - Temporal data patterns
-- [**Geospatial Analysis**](geospatial.html) - Geographic data processing
-- [**Statistical Analysis**](statistical.html) - Data statistics and aggregation
+- **Climate Data Processing** *(coming soon)* - Working with meteorological data
+- **Time Series Analysis** *(coming soon)* - Temporal data patterns
+- **Geospatial Analysis** *(coming soon)* - Geographic data processing
+- **Statistical Analysis** *(coming soon)* - Data statistics and aggregation
 
 ## Advanced Workflows
 
-- [**Data Pipeline**](data-pipeline.html) - Processing workflows
-- [**Real-time Data**](realtime-data.html) - Live data streaming
-- [**Batch Processing**](batch-processing.html) - Multiple file operations
-- [**Performance Optimization**](performance-examples.html) - Efficient data handling
+- **Data Pipeline** *(coming soon)* - Processing workflows
+- **Real-time Data** *(coming soon)* - Live data streaming
+- **Batch Processing** *(coming soon)* - Multiple file operations
+- **Performance Optimization** *(coming soon)* - Efficient data handling
 
 ## Integration Examples
 
-- [**React Components**](react-components.html) - React.js integration
-- [**Vue.js Application**](vue-application.html) - Vue.js framework
-- [**Node.js Server**](nodejs-server.html) - Server-side processing
-- [**Electron App**](electron-app.html) - Desktop application
+- **React Components** *(coming soon)* - React.js integration
+- **Vue.js Application** *(coming soon)* - Vue.js framework
+- **Node.js Server** *(coming soon)* - Server-side processing
+- **Electron App** *(coming soon)* - Desktop application
 
 ---
 
@@ -175,4 +175,4 @@ Many examples include live, runnable demonstrations that you can try in your bro
 
 ---
 
-**Note**: All examples are available in the [GitHub repository](https://github.com/yourusername/netcdf4-wasm/tree/main/examples) with complete source code and setup instructions.
+**Note**: All examples are available in the [GitHub repository](https://github.com/oceanum-io/netcdf4-wasm/tree/main/examples) with complete source code and setup instructions.

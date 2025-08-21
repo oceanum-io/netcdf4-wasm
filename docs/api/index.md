@@ -9,12 +9,12 @@ Complete API documentation for netcdf4-wasm.
 
 ## Quick Navigation
 
-- [Dataset Class](dataset.html) - Main interface for NetCDF files
-- [Variable Class](variable.html) - Access and manipulate variables
-- [Dimension Class](dimension.html) - Work with dimensions
-- [Group Class](group.html) - Hierarchical data organization
-- [Constants](constants.html) - NetCDF constants and enumerations
-- [Types](types.html) - TypeScript type definitions
+- [Dataset Class](dataset) - Main interface for NetCDF files
+- [Variable Class](variable) - Access and manipulate variables
+- **Dimension Class** *(coming soon)* - Work with dimensions
+- **Group Class** *(coming soon)* - Hierarchical data organization
+- **Constants** *(coming soon)* - NetCDF constants and enumerations
+- **Types** *(coming soon)* - TypeScript type definitions
 
 ## Core Concepts
 

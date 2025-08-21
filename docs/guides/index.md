@@ -9,42 +9,42 @@ Comprehensive guides for getting started and mastering netcdf4-wasm.
 
 ## Getting Started
 
-- [**Installation & Setup**](installation.html) - Install and configure netcdf4-wasm
-- [**Quick Start Guide**](getting-started.html) - Your first NetCDF operations
-- [**Basic Concepts**](basic-concepts.html) - Understanding NetCDF structure and terminology
+- [**Quick Start Guide**](getting-started) - Your first NetCDF operations
+- **Installation & Setup** *(coming soon)* - Install and configure netcdf4-wasm  
+- **Basic Concepts** *(coming soon)* - Understanding NetCDF structure and terminology
 
 ## Core Functionality
 
-- [**File Operations**](file-operations.html) - Creating, opening, and managing NetCDF files
-- [**Working with Variables**](variables.html) - Creating, reading, and writing data variables
-- [**Dimensions and Coordinates**](dimensions.html) - Setting up data dimensions and coordinate systems
-- [**Attributes and Metadata**](attributes.html) - Managing file and variable metadata
+- **File Operations** *(coming soon)* - Creating, opening, and managing NetCDF files
+- **Working with Variables** *(coming soon)* - Creating, reading, and writing data variables
+- **Dimensions and Coordinates** *(coming soon)* - Setting up data dimensions and coordinate systems
+- **Attributes and Metadata** *(coming soon)* - Managing file and variable metadata
 
 ## Advanced Features
 
-- [**Memory-based Operations**](memory-operations.html) - Working with Blobs and ArrayBuffers
-- [**Browser Integration**](browser-integration.html) - File inputs, downloads, and web workflows
-- [**Groups and Hierarchies**](groups.html) - Organizing data with NetCDF4 groups
-- [**Data Types and Precision**](data-types.html) - Choosing appropriate data types
+- **Memory-based Operations** *(coming soon)* - Working with Blobs and ArrayBuffers
+- **Browser Integration** *(coming soon)* - File inputs, downloads, and web workflows
+- **Groups and Hierarchies** *(coming soon)* - Organizing data with NetCDF4 groups
+- **Data Types and Precision** *(coming soon)* - Choosing appropriate data types
 
 ## Development
 
-- [**Building from Source**](building.html) - Compile netcdf4-wasm from source
-- [**TypeScript Integration**](typescript.html) - Using with TypeScript projects
-- [**Testing and Debugging**](testing.html) - Testing strategies and troubleshooting
+- **Building from Source** *(coming soon)* - Compile netcdf4-wasm from source
+- **TypeScript Integration** *(coming soon)* - Using with TypeScript projects
+- **Testing and Debugging** *(coming soon)* - Testing strategies and troubleshooting
 
 ## Best Practices
 
-- [**Performance Optimization**](performance.html) - Writing efficient code
-- [**CF Conventions**](cf-conventions.html) - Following climate data standards
-- [**Error Handling**](error-handling.html) - Robust error handling patterns
-- [**Security Considerations**](security.html) - Safe practices for web applications
+- **Performance Optimization** *(coming soon)* - Writing efficient code
+- **CF Conventions** *(coming soon)* - Following climate data standards
+- **Error Handling** *(coming soon)* - Robust error handling patterns
+- **Security Considerations** *(coming soon)* - Safe practices for web applications
 
 ## Migration and Compatibility
 
-- [**From netcdf4-python**](python-migration.html) - Migrating from Python netCDF4
-- [**Browser Compatibility**](browser-compatibility.html) - Supporting different browsers
-- [**Node.js vs Browser**](nodejs-vs-browser.html) - Environment-specific considerations
+- **From netcdf4-python** *(coming soon)* - Migrating from Python netCDF4
+- **Browser Compatibility** *(coming soon)* - Supporting different browsers
+- **Node.js vs Browser** *(coming soon)* - Environment-specific considerations
 
 ---
 
@@ -94,4 +94,4 @@ const exportBlob = await dataset.toBlob();
 
 ---
 
-**Need help?** Check our [examples](../examples/) or open an issue on [GitHub](https://github.com/yourusername/netcdf4-wasm/issues).
+**Need help?** Check our [examples](../examples/) or open an issue on [GitHub](https://github.com/oceanum-io/netcdf4-wasm/issues).

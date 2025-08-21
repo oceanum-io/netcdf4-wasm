@@ -7,9 +7,9 @@ baseurl: "" # Set by GitHub Actions automatically
 url: "" # Set by GitHub Actions automatically
 
 # GitHub Pages settings
-repository: yourusername/netcdf4-wasm
+repository: oceanum-io/netcdf4-wasm
 github:
-  owner_name: yourusername
+  owner_name: oceanum-io
   repository_name: netcdf4-wasm
 
 # Build settings

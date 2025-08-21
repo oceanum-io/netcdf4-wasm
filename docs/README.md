@@ -85,7 +85,7 @@ docs/
 
 1. Go to your repository **Settings** → **Pages**
 2. Under **Source**, select "**GitHub Actions**"
-3. The documentation will be available at `https://yourusername.github.io/netcdf4-wasm/`
+3. The documentation will be available at `https://oceanum-io.github.io/netcdf4-wasm/`
 
 The `docs/index.md` file serves as the root page of the documentation site.
 
