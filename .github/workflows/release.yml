@@ -1,0 +1,111 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        registry-url: 'https://registry.npmjs.org'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run tests
+      run: npm test
+    
+    - name: Build project
+      run: |
+        npm run build:js
+        # Only build WASM if dependencies are available
+        if npm run check-deps 2>/dev/null; then
+          npm run install-emscripten
+          source build/emsdk/emsdk_env.sh
+          npm run build:wasm
+        fi
+    
+    - name: Create package
+      run: npm pack
+    
+    - name: Extract version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+    
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          ## Changes in ${{ steps.version.outputs.VERSION }}
+          
+          ### Features
+          - NetCDF4 library compiled to WebAssembly
+          - JavaScript/TypeScript bindings with Python-like API
+          - Browser and Node.js support
+          - Memory-based operations (Blob/ArrayBuffer support)
+          
+          ### Installation
+          ```bash
+          npm install netcdf4-wasm@${{ steps.version.outputs.VERSION }}
+          ```
+          
+          ### Documentation
+          See the [documentation site](https://yourusername.github.io/netcdf4-wasm/) for complete usage information.
+          
+          ### Files
+          - `netcdf4-wasm-${{ steps.version.outputs.VERSION }}.tgz` - NPM package
+        draft: false
+        prerelease: false
+    
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./netcdf4-wasm-${{ steps.version.outputs.VERSION }}.tgz
+        asset_name: netcdf4-wasm-${{ steps.version.outputs.VERSION }}.tgz
+        asset_content_type: application/gzip
+    
+    - name: Publish to NPM
+      run: npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  update-docs:
+    runs-on: ubuntu-latest
+    needs: build-and-release
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Trigger docs deployment
+      run: |
+        # Touch a file in docs to trigger the docs workflow
+        touch docs/.release-trigger
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add docs/.release-trigger
+        git commit -m "Trigger docs update for release" || exit 0
+        git push
