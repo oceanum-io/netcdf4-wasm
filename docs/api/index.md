@@ -61,7 +61,7 @@ await variable.setValue(newData);              // Write data
 // Attributes
 console.log(variable.units);                   // Quick access to common attributes
 variable.units = 'K';                         // Set attributes
-variable.setncattr('custom_attr', 'value');   // Set any attribute
+variable.setAttr('custom_attr', 'value');   // Set any attribute
 ```
 
 ### Dimensions
@@ -160,9 +160,9 @@ variable.standard_name = 'air_temperature';
 variable.long_name = 'Air Temperature';
 variable._FillValue = -9999.0;
 
-dataset.setncattr('Conventions', 'CF-1.8');
-dataset.setncattr('title', 'My Dataset');
-dataset.setncattr('history', new Date().toISOString() + ' created');
+dataset.setAttr('Conventions', 'CF-1.8');
+dataset.setAttr('title', 'My Dataset');
+dataset.setAttr('history', new Date().toISOString() + ' created');
 ```
 
 ## Version Compatibility

@@ -233,43 +233,43 @@ const forecasts = dataset.createGroup('forecasts');
 
 ### Attribute Operations
 
-#### setncattr()
+#### setAttr()
 
 ```typescript
-setncattr(name: string, value: any): void
+setAttr(name: string, value: any): void
 ```
 
 Set a global attribute.
 
 ```javascript
-dataset.setncattr('title', 'My Dataset');
-dataset.setncattr('version', 1.0);
-dataset.setncattr('created', new Date().toISOString());
+dataset.setAttr('title', 'My Dataset');
+dataset.setAttr('version', 1.0);
+dataset.setAttr('created', new Date().toISOString());
 ```
 
-#### getncattr()
+#### getAttr()
 
 ```typescript
-getncattr(name: string): any
+getAttr(name: string): any
 ```
 
 Get a global attribute value.
 
 ```javascript
-const title = dataset.getncattr('title');
-const version = dataset.getncattr('version');
+const title = dataset.getAttr('title');
+const version = dataset.getAttr('version');
 ```
 
-#### ncattrs()
+#### attrs()
 
 ```typescript
-ncattrs(): string[]
+attrs(): string[]
 ```
 
 Get list of all global attribute names.
 
 ```javascript
-const attrs = dataset.ncattrs();
+const attrs = dataset.attrs();
 console.log('Global attributes:', attrs);
 ```
 
@@ -349,9 +349,9 @@ async function createDataset() {
     
     try {
         // Set global attributes
-        nc.setncattr('Conventions', 'CF-1.8');
-        nc.setncattr('title', 'Sample Dataset');
-        nc.setncattr('institution', 'Example University');
+        nc.setAttr('Conventions', 'CF-1.8');
+        nc.setAttr('title', 'Sample Dataset');
+        nc.setAttr('institution', 'Example University');
         
         // Create dimensions
         const time = await nc.createDimension('time', null);  // unlimited
@@ -419,9 +419,9 @@ async function readDataset() {
         console.log('Variables:', Object.keys(nc.variables));
         
         // Read global attributes
-        const attrs = nc.ncattrs();
+        const attrs = nc.attrs();
         attrs.forEach(attr => {
-            console.log(`${attr}: ${nc.getncattr(attr)}`);
+            console.log(`${attr}: ${nc.getAttr(attr)}`);
         });
         
         // Access variables

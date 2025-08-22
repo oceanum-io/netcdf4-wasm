@@ -92,43 +92,43 @@ await variable.setValue(data);
 
 ### Attribute Operations
 
-#### setncattr()
+#### setAttr()
 
 ```typescript
-setncattr(name: string, value: any): void
+setAttr(name: string, value: any): void
 ```
 
 Set a variable attribute.
 
 ```javascript
-variable.setncattr('units', 'meters per second');
-variable.setncattr('valid_range', [0, 100]);
-variable.setncattr('_FillValue', -9999.0);
+variable.setAttr('units', 'meters per second');
+variable.setAttr('valid_range', [0, 100]);
+variable.setAttr('_FillValue', -9999.0);
 ```
 
-#### getncattr()
+#### getAttr()
 
 ```typescript
-getncattr(name: string): any
+getAttr(name: string): any
 ```
 
 Get a variable attribute value.
 
 ```javascript
-const units = variable.getncattr('units');
-const fillValue = variable.getncattr('_FillValue');
+const units = variable.getAttr('units');
+const fillValue = variable.getAttr('_FillValue');
 ```
 
-#### ncattrs()
+#### attrs()
 
 ```typescript
-ncattrs(): string[]
+attrs(): string[]
 ```
 
 Get list of all attribute names for this variable.
 
 ```javascript
-const attrs = variable.ncattrs();
+const attrs = variable.attrs();
 console.log('Variable attributes:', attrs);
 ```
 
@@ -201,9 +201,9 @@ async function createVariables() {
         temp._FillValue = -9999.0;
         
         // Set custom attributes
-        temp.setncattr('valid_range', [200.0, 320.0]);
-        temp.setncattr('coordinates', 'time lat lon');
-        temp.setncattr('grid_mapping', 'crs');
+        temp.setAttr('valid_range', [200.0, 320.0]);
+        temp.setAttr('coordinates', 'time lat lon');
+        temp.setAttr('grid_mapping', 'crs');
         
         // Generate and write data
         const data = new Float64Array(12 * 180 * 360);
@@ -255,9 +255,9 @@ async function analyzeVariable() {
         
         // Print attributes
         console.log('\nAttributes:');
-        const attrs = temp.ncattrs();
+        const attrs = temp.attrs();
         attrs.forEach(attr => {
-            const value = temp.getncattr(attr);
+            const value = temp.getAttr(attr);
             console.log(`  ${attr}: ${value}`);
         });
         
@@ -376,26 +376,26 @@ async function metadataExample() {
         
         // Data quality attributes
         pressure._FillValue = -9999.0;
-        pressure.setncattr('valid_min', 50000.0);
-        pressure.setncattr('valid_max', 110000.0);
-        pressure.setncattr('accuracy', 100.0); // ±100 Pa
+        pressure.setAttr('valid_min', 50000.0);
+        pressure.setAttr('valid_max', 110000.0);
+        pressure.setAttr('accuracy', 100.0); // ±100 Pa
         
         // Grid and coordinate attributes
-        pressure.setncattr('coordinates', 'time level latitude longitude');
-        pressure.setncattr('grid_mapping', 'crs');
+        pressure.setAttr('coordinates', 'time level latitude longitude');
+        pressure.setAttr('grid_mapping', 'crs');
         
         // Processing attributes
-        pressure.setncattr('source', 'Numerical Weather Prediction Model');
-        pressure.setncattr('processing_level', '2');
-        pressure.setncattr('cell_methods', 'time: mean level: point');
+        pressure.setAttr('source', 'Numerical Weather Prediction Model');
+        pressure.setAttr('processing_level', '2');
+        pressure.setAttr('cell_methods', 'time: mean level: point');
         
         // Custom application attributes
-        pressure.setncattr('sensor_type', 'pressure_sensor_v2.1');
-        pressure.setncattr('calibration_date', '2023-01-15');
-        pressure.setncattr('data_version', '1.2.3');
+        pressure.setAttr('sensor_type', 'pressure_sensor_v2.1');
+        pressure.setAttr('calibration_date', '2023-01-15');
+        pressure.setAttr('data_version', '1.2.3');
         
         console.log('Created variable with comprehensive metadata');
-        console.log('Attributes:', pressure.ncattrs());
+        console.log('Attributes:', pressure.attrs());
         
     } finally {
         await nc.close();

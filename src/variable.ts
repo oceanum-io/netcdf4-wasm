@@ -16,7 +16,7 @@ export class Variable {
     ) {}
 
     // Attribute access (Python-like)
-    setncattr(name: string, value: any): void {
+    setAttr(name: string, value: any): void {
         this._attributes[name] = value;
         
         // Store in mock file system if in test mode
@@ -31,11 +31,11 @@ export class Variable {
         // TODO: Implement actual NetCDF attribute setting
     }
 
-    getncattr(name: string): any {
+    getAttr(name: string): any {
         return this._attributes[name];
     }
 
-    ncattrs(): string[] {
+    attrs(): string[] {
         return Object.keys(this._attributes);
     }
 
@@ -136,29 +136,29 @@ export class Variable {
 
     // Property-style attribute access
     get units(): string | undefined { return this._attributes.units; }
-    set units(value: string) { this.setncattr('units', value); }
+    set units(value: string) { this.setAttr('units', value); }
 
     get long_name(): string | undefined { return this._attributes.long_name; }
-    set long_name(value: string) { this.setncattr('long_name', value); }
+    set long_name(value: string) { this.setAttr('long_name', value); }
 
     get standard_name(): string | undefined { return this._attributes.standard_name; }
-    set standard_name(value: string) { this.setncattr('standard_name', value); }
+    set standard_name(value: string) { this.setAttr('standard_name', value); }
 
     get scale_factor(): number | undefined { return this._attributes.scale_factor; }
-    set scale_factor(value: number) { this.setncattr('scale_factor', value); }
+    set scale_factor(value: number) { this.setAttr('scale_factor', value); }
 
     get add_offset(): number | undefined { return this._attributes.add_offset; }
-    set add_offset(value: number) { this.setncattr('add_offset', value); }
+    set add_offset(value: number) { this.setAttr('add_offset', value); }
 
     get _FillValue(): number | undefined { return this._attributes._FillValue; }
-    set _FillValue(value: number) { this.setncattr('_FillValue', value); }
+    set _FillValue(value: number) { this.setAttr('_FillValue', value); }
 
     // Additional CF convention attributes
     get calendar(): string | undefined { return this._attributes.calendar; }
-    set calendar(value: string) { this.setncattr('calendar', value); }
+    set calendar(value: string) { this.setAttr('calendar', value); }
 
     get axis(): string | undefined { return this._attributes.axis; }
-    set axis(value: string) { this.setncattr('axis', value); }
+    set axis(value: string) { this.setAttr('axis', value); }
 
     toString(): string {
         const dimStr = this.dimensions.length > 0 ? `(${this.dimensions.join(', ')})` : '()';

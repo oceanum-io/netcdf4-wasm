@@ -29,13 +29,13 @@ describe('Integration Tests', () => {
                 const nc = await Dataset(filename, 'w', { format: 'NETCDF4' });
                 
                 // Global attributes following CF conventions
-                nc.setncattr('Conventions', 'CF-1.8');
-                nc.setncattr('title', 'Sample Climate Data');
-                nc.setncattr('institution', 'NetCDF4-WASM Test Suite');
-                nc.setncattr('source', 'Synthetic test data');
-                nc.setncattr('history', new Date().toISOString() + ' created by integration test');
-                nc.setncattr('references', 'CF Conventions v1.8');
-                nc.setncattr('comment', 'Integration test for complete climate dataset workflow');
+                nc.setAttr('Conventions', 'CF-1.8');
+                nc.setAttr('title', 'Sample Climate Data');
+                nc.setAttr('institution', 'NetCDF4-WASM Test Suite');
+                nc.setAttr('source', 'Synthetic test data');
+                nc.setAttr('history', new Date().toISOString() + ' created by integration test');
+                nc.setAttr('references', 'CF Conventions v1.8');
+                nc.setAttr('comment', 'Integration test for complete climate dataset workflow');
                 
                 // Create dimensions
                 const time_dim = await nc.createDimension('time', null); // unlimited
@@ -62,51 +62,51 @@ describe('Integration Tests', () => {
                 lat_var.long_name = 'latitude';
                 lat_var.units = 'degrees_north';
                 lat_var.axis = 'Y';
-                lat_var.setncattr('valid_min', -90.0);
-                lat_var.setncattr('valid_max', 90.0);
+                lat_var.setAttr('valid_min', -90.0);
+                lat_var.setAttr('valid_max', 90.0);
                 
                 const lon_var = await nc.createVariable('lon', 'f4', ['lon']);
                 lon_var.standard_name = 'longitude';
                 lon_var.long_name = 'longitude';
                 lon_var.units = 'degrees_east';
                 lon_var.axis = 'X';
-                lon_var.setncattr('valid_min', -180.0);
-                lon_var.setncattr('valid_max', 180.0);
+                lon_var.setAttr('valid_min', -180.0);
+                lon_var.setAttr('valid_max', 180.0);
                 
                 const level_var = await nc.createVariable('level', 'f4', ['level']);
                 level_var.standard_name = 'air_pressure';
                 level_var.long_name = 'pressure level';
                 level_var.units = 'hPa';
                 level_var.axis = 'Z';
-                level_var.setncattr('positive', 'down');
+                level_var.setAttr('positive', 'down');
                 
                 // Create data variables
                 const temp_var = await nc.createVariable('air_temperature', 'f8', ['time', 'level', 'lat', 'lon']);
                 temp_var.standard_name = 'air_temperature';
                 temp_var.long_name = 'Air Temperature';
                 temp_var.units = 'K';
-                temp_var.setncattr('coordinates', 'time level lat lon');
-                temp_var.setncattr('cell_methods', 'time: mean');
+                temp_var.setAttr('coordinates', 'time level lat lon');
+                temp_var.setAttr('cell_methods', 'time: mean');
                 temp_var._FillValue = -9999.0;
-                temp_var.setncattr('valid_min', 150.0);
-                temp_var.setncattr('valid_max', 350.0);
+                temp_var.setAttr('valid_min', 150.0);
+                temp_var.setAttr('valid_max', 350.0);
                 
                 const humidity_var = await nc.createVariable('relative_humidity', 'f8', ['time', 'level', 'lat', 'lon']);
                 humidity_var.standard_name = 'relative_humidity';
                 humidity_var.long_name = 'Relative Humidity';
                 humidity_var.units = '%';
-                humidity_var.setncattr('coordinates', 'time level lat lon');
+                humidity_var.setAttr('coordinates', 'time level lat lon');
                 humidity_var._FillValue = -9999.0;
-                humidity_var.setncattr('valid_min', 0.0);
-                humidity_var.setncattr('valid_max', 100.0);
+                humidity_var.setAttr('valid_min', 0.0);
+                humidity_var.setAttr('valid_max', 100.0);
                 
                 const precip_var = await nc.createVariable('precipitation_flux', 'f8', ['time', 'lat', 'lon']);
                 precip_var.standard_name = 'precipitation_flux';
                 precip_var.long_name = 'Precipitation Rate';
                 precip_var.units = 'kg m-2 s-1';
-                precip_var.setncattr('coordinates', 'time lat lon');
+                precip_var.setAttr('coordinates', 'time lat lon');
                 precip_var._FillValue = -9999.0;
-                precip_var.setncattr('valid_min', 0.0);
+                precip_var.setAttr('valid_min', 0.0);
                 
                 // Verify all variables are created
                 expect(Object.keys(nc.variables)).toHaveLength(7);
@@ -198,8 +198,8 @@ describe('Integration Tests', () => {
                 expect(read_precip[50]).toBeCloseTo(precip_data[50]);
                 
                 // Verify global attributes
-                expect(nc.getncattr('Conventions')).toBe('CF-1.8');
-                expect(nc.getncattr('title')).toBe('Sample Climate Data');
+                expect(nc.getAttr('Conventions')).toBe('CF-1.8');
+                expect(nc.getAttr('title')).toBe('Sample Climate Data');
                 
                 // Verify variable attributes
                 expect(temp_var.standard_name).toBe('air_temperature');
@@ -219,13 +219,13 @@ describe('Integration Tests', () => {
             if (mockMode) {
                 // Test the interface even without WASM
                 const nc = new NetCDF4(filename, 'w');
-                nc.setncattr('title', 'Multi-Group Dataset');
+                nc.setAttr('title', 'Multi-Group Dataset');
                 
                 const obs_group = nc.createGroup('observations');
                 const model_group = nc.createGroup('model');
                 
-                obs_group.setncattr('description', 'Observational data');
-                model_group.setncattr('description', 'Model output');
+                obs_group.setAttr('description', 'Observational data');
+                model_group.setAttr('description', 'Model output');
                 
                 expect(Object.keys(nc.groups)).toHaveLength(2);
                 expect(nc.groups.observations).toBe(obs_group);
@@ -237,9 +237,9 @@ describe('Integration Tests', () => {
                 const nc = await Dataset(filename, 'w', { format: 'NETCDF4' });
                 
                 // Root level attributes
-                nc.setncattr('title', 'Multi-Group Meteorological Dataset');
-                nc.setncattr('institution', 'Integration Test Suite');
-                nc.setncattr('Conventions', 'CF-1.8');
+                nc.setAttr('title', 'Multi-Group Meteorological Dataset');
+                nc.setAttr('institution', 'Integration Test Suite');
+                nc.setAttr('Conventions', 'CF-1.8');
                 
                 // Create groups for different data types
                 const obs_group = nc.createGroup('observations');
@@ -247,8 +247,8 @@ describe('Integration Tests', () => {
                 const analysis_group = nc.createGroup('analysis');
                 
                 // Observations group
-                obs_group.setncattr('description', 'Surface weather station observations');
-                obs_group.setncattr('source', 'Automatic weather stations');
+                obs_group.setAttr('description', 'Surface weather station observations');
+                obs_group.setAttr('source', 'Automatic weather stations');
                 
                 await obs_group.createDimension('station', 100);
                 await obs_group.createDimension('obs_time', null);
@@ -258,8 +258,8 @@ describe('Integration Tests', () => {
                 station_temp.units = 'K';
                 
                 // Model group
-                model_group.setncattr('description', 'Numerical weather prediction model output');
-                model_group.setncattr('model_name', 'Test Model v1.0');
+                model_group.setAttr('description', 'Numerical weather prediction model output');
+                model_group.setAttr('model_name', 'Test Model v1.0');
                 
                 await model_group.createDimension('model_time', 24);
                 await model_group.createDimension('grid_x', 50);
@@ -270,8 +270,8 @@ describe('Integration Tests', () => {
                 model_temp.units = 'K';
                 
                 // Analysis group
-                analysis_group.setncattr('description', 'Data analysis results');
-                analysis_group.setncattr('analysis_method', 'Statistical comparison');
+                analysis_group.setAttr('description', 'Data analysis results');
+                analysis_group.setAttr('analysis_method', 'Statistical comparison');
                 
                 await analysis_group.createDimension('region', 10);
                 const bias = await analysis_group.createVariable('model_bias', 'f8', ['region']);
@@ -285,9 +285,9 @@ describe('Integration Tests', () => {
                 expect(nc.groups.analysis).toBeDefined();
                 
                 // Verify group attributes
-                expect(obs_group.getncattr('source')).toBe('Automatic weather stations');
-                expect(model_group.getncattr('model_name')).toBe('Test Model v1.0');
-                expect(analysis_group.getncattr('analysis_method')).toBe('Statistical comparison');
+                expect(obs_group.getAttr('source')).toBe('Automatic weather stations');
+                expect(model_group.getAttr('model_name')).toBe('Test Model v1.0');
+                expect(analysis_group.getAttr('analysis_method')).toBe('Statistical comparison');
                 
                 // Verify dimensions and variables in groups
                 expect(Object.keys(obs_group.dimensions)).toContain('station');
@@ -316,8 +316,8 @@ describe('Integration Tests', () => {
                 // Phase 1: Create and write dataset
                 let nc = await Dataset(filename, 'w');
                 
-                nc.setncattr('phase', 'creation');
-                nc.setncattr('created', new Date().toISOString());
+                nc.setAttr('phase', 'creation');
+                nc.setAttr('created', new Date().toISOString());
                 
                 await nc.createDimension('time', 10);
                 await nc.createDimension('location', 20);
@@ -341,8 +341,8 @@ describe('Integration Tests', () => {
                 // Phase 2: Read and verify dataset
                 nc = await Dataset(filename, 'r');
                 
-                expect(nc.getncattr('phase')).toBe('creation');
-                expect(nc.getncattr('created')).toBeDefined();
+                expect(nc.getAttr('phase')).toBe('creation');
+                expect(nc.getAttr('created')).toBeDefined();
                 
                 expect(Object.keys(nc.dimensions)).toContain('time');
                 expect(Object.keys(nc.dimensions)).toContain('location');
@@ -364,14 +364,14 @@ describe('Integration Tests', () => {
                 // Phase 3: Append mode (modify existing file)
                 nc = await Dataset(filename, 'a');
                 
-                nc.setncattr('phase', 'modification');
-                nc.setncattr('modified', new Date().toISOString());
+                nc.setAttr('phase', 'modification');
+                nc.setAttr('modified', new Date().toISOString());
                 
                 // Add new variable
                 const quality_var = await nc.createVariable('quality_flags', 'f8', ['time', 'location']);
                 quality_var.long_name = 'Data quality indicators';
-                quality_var.setncattr('flag_values', '0, 1, 2, 3');
-                quality_var.setncattr('flag_meanings', 'good questionable bad missing');
+                quality_var.setAttr('flag_values', '0, 1, 2, 3');
+                quality_var.setAttr('flag_meanings', 'good questionable bad missing');
                 
                 // Generate quality data
                 const quality_data = new Float64Array(10 * 20);
@@ -385,9 +385,9 @@ describe('Integration Tests', () => {
                 // Phase 4: Final verification
                 nc = await Dataset(filename, 'r');
                 
-                expect(nc.getncattr('phase')).toBe('modification');
-                expect(nc.getncattr('created')).toBeDefined();
-                expect(nc.getncattr('modified')).toBeDefined();
+                expect(nc.getAttr('phase')).toBe('modification');
+                expect(nc.getAttr('created')).toBeDefined();
+                expect(nc.getAttr('modified')).toBeDefined();
                 
                 expect(Object.keys(nc.variables)).toHaveLength(2);
                 expect(nc.variables.measurements).toBeDefined();
@@ -477,7 +477,7 @@ describe('Integration Tests', () => {
                 vars.forEach((v, i) => {
                     v.long_name = `Test variable ${i}`;
                     v.units = 'dimensionless';
-                    v.setncattr('creation_order', i);
+                    v.setAttr('creation_order', i);
                     v._FillValue = -9999.0;
                 });
                 

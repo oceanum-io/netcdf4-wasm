@@ -205,17 +205,17 @@ describe('Memory-based Dataset Basic Tests', () => {
             
             try {
                 // Set global attributes
-                dataset.setncattr('title', 'Memory Dataset Test');
-                dataset.setncattr('version', 1.0);
-                dataset.setncattr('created_by', 'netcdf4-wasm test suite');
+                dataset.setAttr('title', 'Memory Dataset Test');
+                dataset.setAttr('version', 1.0);
+                dataset.setAttr('created_by', 'netcdf4-wasm test suite');
                 
                 // Verify attributes
-                expect(dataset.getncattr('title')).toBe('Memory Dataset Test');
-                expect(dataset.getncattr('version')).toBe(1.0);
-                expect(dataset.getncattr('created_by')).toBe('netcdf4-wasm test suite');
+                expect(dataset.getAttr('title')).toBe('Memory Dataset Test');
+                expect(dataset.getAttr('version')).toBe(1.0);
+                expect(dataset.getAttr('created_by')).toBe('netcdf4-wasm test suite');
                 
                 // List all attributes
-                const attrs = dataset.ncattrs();
+                const attrs = dataset.attrs();
                 expect(attrs).toContain('title');
                 expect(attrs).toContain('version');
                 expect(attrs).toContain('created_by');
@@ -237,14 +237,14 @@ describe('Memory-based Dataset Basic Tests', () => {
                 variable.long_name = 'Air Temperature';
                 
                 // Set attributes using method
-                variable.setncattr('valid_range', [200, 320]);
-                variable.setncattr('_FillValue', -9999.0);
+                variable.setAttr('valid_range', [200, 320]);
+                variable.setAttr('_FillValue', -9999.0);
                 
                 // Verify attributes
                 expect(variable.units).toBe('K');
                 expect(variable.long_name).toBe('Air Temperature');
-                expect(variable.getncattr('valid_range')).toEqual([200, 320]);
-                expect(variable.getncattr('_FillValue')).toBe(-9999.0);
+                expect(variable.getAttr('valid_range')).toEqual([200, 320]);
+                expect(variable.getAttr('_FillValue')).toBe(-9999.0);
                 
             } finally {
                 await dataset.close();
@@ -389,12 +389,12 @@ describe('Memory-based Dataset Basic Tests', () => {
                 
                 // Set attributes using both methods
                 temp.units = 'K';
-                temp.setncattr('long_name', 'Air Temperature');
-                pressure.setncattr('units', 'Pa');
+                temp.setAttr('long_name', 'Air Temperature');
+                pressure.setAttr('units', 'Pa');
                 
                 expect(temp.units).toBe('K');
-                expect(temp.getncattr('long_name')).toBe('Air Temperature');
-                expect(pressure.getncattr('units')).toBe('Pa');
+                expect(temp.getAttr('long_name')).toBe('Air Temperature');
+                expect(pressure.getAttr('units')).toBe('Pa');
                 
                 // Verify dimensions are correct
                 expect(temp.dimensions).toEqual(['time', 'lat', 'lon']);
@@ -416,8 +416,8 @@ describe('Memory-based Dataset Basic Tests', () => {
                 const datasets = [memoryDataset, fileDataset];
                 
                 for (const dataset of datasets) {
-                    dataset.setncattr('title', 'Consistency Test');
-                    dataset.setncattr('version', 1.0);
+                    dataset.setAttr('title', 'Consistency Test');
+                    dataset.setAttr('version', 1.0);
                     
                     await dataset.createDimension('x', 5);
                     await dataset.createDimension('y', 10);
@@ -428,8 +428,8 @@ describe('Memory-based Dataset Basic Tests', () => {
                 }
                 
                 // Verify both have identical structure
-                expect(memoryDataset.getncattr('title')).toBe(fileDataset.getncattr('title'));
-                expect(memoryDataset.getncattr('version')).toBe(fileDataset.getncattr('version'));
+                expect(memoryDataset.getAttr('title')).toBe(fileDataset.getAttr('title'));
+                expect(memoryDataset.getAttr('version')).toBe(fileDataset.getAttr('version'));
                 
                 expect(Object.keys(memoryDataset.dimensions)).toEqual(Object.keys(fileDataset.dimensions));
                 expect(Object.keys(memoryDataset.variables)).toEqual(Object.keys(fileDataset.variables));

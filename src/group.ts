@@ -19,7 +19,7 @@ export class Group {
     ) {}
 
     // Attribute methods
-    setncattr(name: string, value: any): void {
+    setAttr(name: string, value: any): void {
         this._attributes[name] = value;
         
         // Store in mock file system if in test mode
@@ -33,7 +33,7 @@ export class Group {
         // TODO: Implement actual NetCDF global attribute setting
     }
 
-    getncattr(name: string): any {
+    getAttr(name: string): any {
         // Check mock file system first if in test mode
         if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
             const mockFiles = (global as any).__netcdf4_mock_files;
@@ -49,7 +49,7 @@ export class Group {
         return this._attributes[name];
     }
 
-    ncattrs(): string[] {
+    attrs(): string[] {
         return Object.keys(this._attributes);
     }
 
@@ -97,7 +97,7 @@ export class Group {
                     // Restore variable attributes
                     if (varInfo.attributes) {
                         for (const [attrName, attrValue] of Object.entries(varInfo.attributes)) {
-                            variable.setncattr(attrName, attrValue);
+                            variable.setAttr(attrName, attrValue);
                         }
                     }
                     this.variables[name] = variable;

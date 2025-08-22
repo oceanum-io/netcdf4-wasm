@@ -166,10 +166,10 @@ The simplest way to work with NetCDF files in the browser is through HTML file i
             const container = document.getElementById(containerId);
             container.innerHTML = '';
             
-            const attrs = dataset.ncattrs();
+            const attrs = dataset.attrs();
             for (const attr of attrs) {
                 const div = document.createElement('div');
-                const value = dataset.getncattr(attr);
+                const value = dataset.getAttr(attr);
                 div.innerHTML = `<strong>${attr}:</strong> ${value}`;
                 container.appendChild(div);
             }
@@ -437,13 +437,13 @@ class NetCDFProcessor {
         
         try {
             // Copy global attributes
-            const attrs = originalDataset.ncattrs();
+            const attrs = originalDataset.attrs();
             attrs.forEach(attr => {
-                newDataset.setncattr(attr, originalDataset.getncattr(attr));
+                newDataset.setAttr(attr, originalDataset.getAttr(attr));
             });
             
             // Add modification history
-            newDataset.setncattr('modification_history', 
+            newDataset.setAttr('modification_history', 
                 `Modified on ${new Date().toISOString()}`);
             
             // Copy dimensions
@@ -460,9 +460,9 @@ class NetCDFProcessor {
                 );
                 
                 // Copy attributes
-                const varAttrs = variable.ncattrs();
+                const varAttrs = variable.attrs();
                 varAttrs.forEach(attr => {
-                    newVar.setncattr(attr, variable.getncattr(attr));
+                    newVar.setAttr(attr, variable.getAttr(attr));
                 });
                 
                 // Apply modifications

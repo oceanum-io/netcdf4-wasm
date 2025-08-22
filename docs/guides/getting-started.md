@@ -80,7 +80,7 @@ async function readNetCDFFile() {
         console.log('First 5 values:', tempData.slice(0, 5));
         
         // Read global attributes
-        console.log('Title:', dataset.getncattr('title'));
+        console.log('Title:', dataset.getAttr('title'));
         
     } finally {
         // Always close the dataset
@@ -102,8 +102,8 @@ async function createNetCDFFile() {
     
     try {
         // Set global attributes
-        dataset.setncattr('title', 'My First NetCDF File');
-        dataset.setncattr('created', new Date().toISOString());
+        dataset.setAttr('title', 'My First NetCDF File');
+        dataset.setAttr('created', new Date().toISOString());
         
         // Create dimensions
         const timeDim = await dataset.createDimension('time', 10);
@@ -253,7 +253,7 @@ async function exploreNetCDFFile(source) {
     try {
         console.log('=== File Information ===');
         console.log('Format:', dataset.file_format);
-        console.log('Global attributes:', dataset.ncattrs());
+        console.log('Global attributes:', dataset.attrs());
         
         console.log('\n=== Dimensions ===');
         for (const [name, dim] of Object.entries(dataset.dimensions)) {
@@ -309,7 +309,7 @@ async function processTemperatureData(inputSource) {
             // Update metadata
             outputTemp.units = 'degrees_Celsius';
             outputTemp.long_name = 'Air Temperature in Celsius';
-            outputTemp.setncattr('conversion', 'Converted from Kelvin');
+            outputTemp.setAttr('conversion', 'Converted from Kelvin');
         }
         
         // Export processed data
