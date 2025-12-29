@@ -50,44 +50,64 @@ check_command() {
 # Function to apply config.h patches for NetCDF4 Emscripten compatibility
 apply_config_patches() {
     local config_file="$1"
-    
+
     if [ ! -f "$config_file" ]; then
         error_exit "config.h not found at $config_file"
     fi
-    
+
     log "Patching config.h for Emscripten compatibility..."
-    
+
+    # Determine correct sed -i syntax for the platform
+    local SED_INPLACE
+    if sed --version >/dev/null 2>&1; then
+        # GNU sed
+        SED_INPLACE=(-i)
+    else
+        # BSD/macOS sed
+        SED_INPLACE=(-i '')
+    fi
+
     # Fix SIZEOF definitions for WebAssembly (32-bit target)
-    sed -i 's|/\* #undef SIZEOF_DOUBLE \*/|#define SIZEOF_DOUBLE 8|' "$config_file"
-    sed -i 's|/\* #undef SIZEOF_FLOAT \*/|#define SIZEOF_FLOAT 4|' "$config_file"
-    sed -i 's|/\* #undef SIZEOF_INT \*/|#define SIZEOF_INT 4|' "$config_file"
-    sed -i 's|/\* #undef SIZEOF_LONG \*/|#define SIZEOF_LONG 4|' "$config_file"
-    sed -i 's|/\* #undef SIZEOF_LONG_LONG \*/|#define SIZEOF_LONG_LONG 8|' "$config_file"
-    sed -i 's|/\* #undef SIZEOF_SHORT \*/|#define SIZEOF_SHORT 2|' "$config_file"
-    sed -i 's|/\* #undef SIZEOF_SIZE_T \*/|#define SIZEOF_SIZE_T 4|' "$config_file"
-    sed -i 's|/\* #undef SIZEOF_CHAR \*/|#define SIZEOF_CHAR 1|' "$config_file"
-    sed -i 's|/\* #undef SIZEOF_UCHAR \*/|#define SIZEOF_UCHAR 1|' "$config_file"
-    sed -i 's|/\* #undef SIZEOF_OFF_T \*/|#define SIZEOF_OFF_T 4|' "$config_file"
-    sed -i 's|/\* #undef SIZEOF_OFF64_T \*/|#define SIZEOF_OFF64_T 8|' "$config_file"
-    sed -i 's|/\* #undef SIZEOF_ULONGLONG \*/|#define SIZEOF_ULONGLONG 8|' "$config_file"
-    sed -i 's|/\* #undef SIZEOF_UINT \*/|#define SIZEOF_UINT 4|' "$config_file"
-    sed -i 's|/\* #undef SIZEOF_USHORT \*/|#define SIZEOF_USHORT 2|' "$config_file"
-    
-    # Add additional SIZEOF definitions needed by NetCDF
-    sed -i 's|/\* #undef SIZEOF___INT64 \*/|#define SIZEOF___INT64 8\n#define SIZEOF_UINT64_T 8\n#define SIZEOF_UINT64 8|' "$config_file"
-    
-    # Fix endianness for WebAssembly (little-endian)
-    sed -i 's|#define WORDS_BIGENDIAN 1|/* #undef WORDS_BIGENDIAN */|' "$config_file"
-    
+    sed "${SED_INPLACE[@]}" \
+        -e 's|/\* #undef SIZEOF_DOUBLE \*/|#define SIZEOF_DOUBLE 8|' \
+        -e 's|/\* #undef SIZEOF_FLOAT \*/|#define SIZEOF_FLOAT 4|' \
+        -e 's|/\* #undef SIZEOF_INT \*/|#define SIZEOF_INT 4|' \
+        -e 's|/\* #undef SIZEOF_LONG \*/|#define SIZEOF_LONG 4|' \
+        -e 's|/\* #undef SIZEOF_LONG_LONG \*/|#define SIZEOF_LONG_LONG 8|' \
+        -e 's|/\* #undef SIZEOF_SHORT \*/|#define SIZEOF_SHORT 2|' \
+        -e 's|/\* #undef SIZEOF_SIZE_T \*/|#define SIZEOF_SIZE_T 4|' \
+        -e 's|/\* #undef SIZEOF_CHAR \*/|#define SIZEOF_CHAR 1|' \
+        -e 's|/\* #undef SIZEOF_UCHAR \*/|#define SIZEOF_UCHAR 1|' \
+        -e 's|/\* #undef SIZEOF_OFF_T \*/|#define SIZEOF_OFF_T 4|' \
+        -e 's|/\* #undef SIZEOF_OFF64_T \*/|#define SIZEOF_OFF64_T 8|' \
+        -e 's|/\* #undef SIZEOF_ULONGLONG \*/|#define SIZEOF_ULONGLONG 8|' \
+        -e 's|/\* #undef SIZEOF_UINT \*/|#define SIZEOF_UINT 4|' \
+        -e 's|/\* #undef SIZEOF_USHORT \*/|#define SIZEOF_USHORT 2|' \
+        -e 's|/\* #undef SIZEOF___INT64 \*/|#define SIZEOF___INT64 8\n#define SIZEOF_UINT64_T 8\n#define SIZEOF_UINT64 8|' \
+        "$config_file"
+
+    # Fix endianness
+    sed "${SED_INPLACE[@]}" 's|#define WORDS_BIGENDIAN 1|/* #undef WORDS_BIGENDIAN */|' "$config_file"
+
     # Disable Windows-specific features
-    sed -i 's|#define HAVE_FILE_LENGTH_I64 1|/* #undef HAVE_FILE_LENGTH_I64 */|' "$config_file"
-    
-    # Add ssize_t definition guard
-    sed -i '/^#define SIZEOF_SIZE_T/a\\n/* Define to 1 if you have the `ssize_t'\'' type. */\n#define HAVE_SSIZE_T 1' "$config_file"
-    
+    sed "${SED_INPLACE[@]}" 's|#define HAVE_FILE_LENGTH_I64 1|/* #undef HAVE_FILE_LENGTH_I64 */|' "$config_file"
+
+    # Add ssize_t definition guard (BSD/macOS safe)
+    if command -v perl >/dev/null 2>&1; then
+        # Use Perl for cross-platform multi-line insertion
+        perl -i -pe '
+            if (/^#define SIZEOF_SIZE_T/) {
+                $_ .= "/* Define to 1 if you have the `ssize_t` type. */\n#define HAVE_SSIZE_T 1\n";
+            }
+        ' "$config_file"
+    else
+        # fallback: warn
+        log "⚠️  Skipping ssize_t patch: perl not found, may fail on macOS"
+    fi
+
     # Disable HDF5 collective metadata operations for non-parallel build
-    sed -i 's|#define HDF5_HAS_COLL_METADATA_OPS 1|/* #undef HDF5_HAS_COLL_METADATA_OPS */|' "$config_file"
-    
+    sed "${SED_INPLACE[@]}" 's|#define HDF5_HAS_COLL_METADATA_OPS 1|/* #undef HDF5_HAS_COLL_METADATA_OPS */|' "$config_file"
+
     log "✅ config.h patches applied"
 }
 
@@ -124,7 +144,8 @@ export CC=emcc
 export CXX=em++
 export AR=emar
 export RANLIB=emranlib
-export CFLAGS="-O2 -s USE_PTHREADS=0 -s ALLOW_MEMORY_GROWTH=1 -I$INSTALL_DIR/include"
+export LIBTOOL=emar
+export CFLAGS="-O2 -I$INSTALL_DIR/include"
 export CXXFLAGS="$CFLAGS"
 
 log "Emscripten environment variables set:"
@@ -170,7 +191,7 @@ if [ ! -f "$INSTALL_DIR/lib/libz.a" ]; then
     
     log "Building zlib with emmake..."
     # Use single core for initial build to avoid issues
-    check_command emmake make -j1
+    check_command emmake make -j1 AR=emar ARFLAGS=rcs RANLIB=emranlib
     
     log "Installing zlib..."
     check_command emmake make install
@@ -226,6 +247,7 @@ if [ ! -f "$INSTALL_DIR/lib/libhdf5.a" ]; then
     check_command emcmake cmake .. \
         -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
         -DCMAKE_BUILD_TYPE=Release \
+        -DENABLE_FILEMAP=OFF \
         -DBUILD_SHARED_LIBS=OFF \
         -DHDF5_ENABLE_THREADSAFE=OFF \
         -DHDF5_ENABLE_PARALLEL=OFF \
@@ -241,7 +263,7 @@ if [ ! -f "$INSTALL_DIR/lib/libhdf5.a" ]; then
         -DZLIB_LIBRARY="$INSTALL_DIR/lib/libz.a"
     
     log "Building HDF5 with emmake..."
-    check_command emmake make -j1
+    check_command emmake make -j1 AR=emar ARFLAGS=rcs RANLIB=emranlib
     
     log "Installing HDF5..."
     check_command emmake make install
@@ -290,18 +312,31 @@ if [ ! -f "$INSTALL_DIR/lib/libnetcdf.a" ]; then
     
     # Apply CMakeLists.txt patches before CMake configuration
     log "Patching CMakeLists.txt to bypass CHECK_LIBRARY_EXISTS calls..."
-    
+
+    # Determine sed syntax for in-place editing
+    if sed --version >/dev/null 2>&1; then
+        # GNU sed (Linux)
+        SED_INPLACE=(-i)
+    else
+        # BSD sed (macOS)
+        SED_INPLACE=(-i '')
+    fi
+
     # Comment out all CHECK_LIBRARY_EXISTS calls that cause issues in Emscripten
-    sed -i '933s/^/  # /' CMakeLists.txt || error_exit "Failed to patch CHECK_LIBRARY_EXISTS H5Pget_fapl_mpio"
-    sed -i '941s/^/  # /' CMakeLists.txt || error_exit "Failed to comment CHECK_LIBRARY_EXISTS H5Pset_all_coll_metadata_ops"
-    sed -i '950s/^/  # /' CMakeLists.txt || error_exit "Failed to comment CHECK_LIBRARY_EXISTS H5Dread_chunk"
-    sed -i '953s/^/  # /' CMakeLists.txt || error_exit "Failed to comment CHECK_LIBRARY_EXISTS H5Pset_fapl_ros3"
-    
+    sed "${SED_INPLACE[@]}" '933s/^/  # /' CMakeLists.txt || error_exit "Failed to patch CHECK_LIBRARY_EXISTS H5Pget_fapl_mpio"
+    sed "${SED_INPLACE[@]}" '941s/^/  # /' CMakeLists.txt || error_exit "Failed to comment CHECK_LIBRARY_EXISTS H5Pset_all_coll_metadata_ops"
+    sed "${SED_INPLACE[@]}" '950s/^/  # /' CMakeLists.txt || error_exit "Failed to comment CHECK_LIBRARY_EXISTS H5Dread_chunk"
+    sed "${SED_INPLACE[@]}" '953s/^/  # /' CMakeLists.txt || error_exit "Failed to comment CHECK_LIBRARY_EXISTS H5Pset_fapl_ros3"
+
     # Set bypass variables for the features
-    sed -i '943s/SET(HDF5_HAS_COLL_METADATA_OPS ON)/SET(HDF5_HAS_COLL_METADATA_OPS OFF)/' CMakeLists.txt || error_exit "Failed to set HDF5_HAS_COLL_METADATA_OPS to OFF"
-    sed -i '950a\\n  # Set HAS_READCHUNKS to OFF for Emscripten\\n  SET(HAS_READCHUNKS OFF)' CMakeLists.txt || error_exit "Failed to set HAS_READCHUNKS"
-    sed -i '953a\\n  # Set HAS_HDF5_ROS3 to OFF for Emscripten\\n  SET(HAS_HDF5_ROS3 OFF)' CMakeLists.txt || error_exit "Failed to set HAS_HDF5_ROS3"
-    
+    sed "${SED_INPLACE[@]}" '943s/SET(HDF5_HAS_COLL_METADATA_OPS ON)/SET(HDF5_HAS_COLL_METADATA_OPS OFF)/' CMakeLists.txt || error_exit "Failed to set HDF5_HAS_COLL_METADATA_OPS to OFF"
+    sed "${SED_INPLACE[@]}" '950a\
+    # Set HAS_READCHUNKS to OFF for Emscripten\
+    SET(HAS_READCHUNKS OFF)' CMakeLists.txt || error_exit "Failed to set HAS_READCHUNKS"
+    sed "${SED_INPLACE[@]}" '953a\
+    # Set HAS_HDF5_ROS3 to OFF for Emscripten\
+    SET(HAS_HDF5_ROS3 OFF)' CMakeLists.txt || error_exit "Failed to set HAS_HDF5_ROS3"
+
     log "✅ CMakeLists.txt patches applied"
     
     mkdir -p build && cd build
@@ -310,6 +345,7 @@ if [ ! -f "$INSTALL_DIR/lib/libnetcdf.a" ]; then
     check_command emcmake cmake .. \
         -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
         -DCMAKE_BUILD_TYPE=Release \
+        -DENABLE_FILEMAP=OFF \
         -DCMAKE_BINARY_DIR="$BUILD_DIR/deps/netcdf-c-$NETCDF_VERSION/build" \
         -DBUILD_SHARED_LIBS=OFF \
         -DENABLE_NETCDF_4=ON \
@@ -343,7 +379,7 @@ if [ ! -f "$INSTALL_DIR/lib/libnetcdf.a" ]; then
     apply_config_patches "$(pwd)/config.h"
     
     log "Building NetCDF4 with emmake..."
-    check_command emmake make -j1
+    check_command emmake make -j1 AR=emar ARFLAGS=rcs RANLIB=emranlib
     
     log "Installing NetCDF4..."
     check_command emmake make install
@@ -423,7 +459,8 @@ check_command emcc netcdf_wrapper.c \
     -s WASM=1 \
     -s MODULARIZE=1 \
     -s EXPORT_NAME="NetCDF4Module" \
-    -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap","getValue","setValue","UTF8ToString","stringToUTF8","lengthBytesUTF8","_malloc","_free"]' \
+    -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap","getValue","setValue","UTF8ToString","stringToUTF8","lengthBytesUTF8"]' \
+    -s EXPORTED_FUNCTIONS='["_malloc","_free"]' \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s INITIAL_MEMORY=16777216 \
     --pre-js "$PROJECT_ROOT/bindings/pre.js" \
