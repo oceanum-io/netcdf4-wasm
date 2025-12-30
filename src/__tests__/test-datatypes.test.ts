@@ -1,7 +1,7 @@
 // Data type and array handling tests following netcdf4-python patterns
 
-import { Dataset, NetCDF4, NC_CONSTANTS, DATA_TYPE_MAP } from '../index';
-import { TestSetup } from '../test-setup';
+import { Dataset, NetCDF4, NC_CONSTANTS, DATA_TYPE_MAP } from '../index.js';
+import { TestSetup } from '../test-setup.js';
 
 describe('Data Types and Array Handling', () => {
     let mockMode = false;

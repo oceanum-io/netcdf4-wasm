@@ -1,7 +1,7 @@
 // Dimension tests following netcdf4-python patterns
 
-import { Dataset, NetCDF4, Dimension, NC_CONSTANTS } from '../index';
-import { TestSetup } from '../test-setup';
+import { Dataset, NetCDF4, Dimension, NC_CONSTANTS } from '../index.js';
+import { TestSetup } from '../test-setup.js';
 
 describe('Dimension Tests', () => {
     let mockMode = false;

@@ -16,7 +16,7 @@
     "build:wasm": "bash scripts/build-wasm.sh",
     "build:js": "tsc",
     "clean": "rm -rf dist build coverage",
-    "test": "jest",
+    "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings=ExperimentalWarning' jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "echo 'Linting not configured yet'",

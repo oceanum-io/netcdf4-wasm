@@ -1,7 +1,7 @@
 // Variable tests following netcdf4-python patterns
 
-import { Dataset, NetCDF4, Variable, NC_CONSTANTS } from '../index';
-import { TestSetup } from '../test-setup';
+import { Dataset, NetCDF4, Variable, NC_CONSTANTS } from '../index.js';
+import { TestSetup } from '../test-setup.js';
 
 describe('Variable Tests', () => {
     let mockMode = false;

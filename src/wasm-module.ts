@@ -1,7 +1,7 @@
 // WASM module loading and wrapping functionality
 
 import type { EmscriptenModule, NetCDF4WasmOptions } from './types.js';
-import { NetCDF4Module } from "./types.js";
+import type { NetCDF4Module } from "./types.js";
 
 export class WasmModuleLoader {
     static async loadModule(options: NetCDF4WasmOptions = {}): Promise<NetCDF4Module> {

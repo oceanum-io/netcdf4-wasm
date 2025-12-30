@@ -1,7 +1,7 @@
 // Tests for memory-based dataset functionality (Blob/ArrayBuffer support)
 
-import { NetCDF4, Dataset, DatasetFromBlob, DatasetFromArrayBuffer, DatasetFromMemory } from '../index';
-import { TestSetup } from '../test-setup';
+import { NetCDF4, Dataset, DatasetFromBlob, DatasetFromArrayBuffer, DatasetFromMemory } from '../index.js';
+import { TestSetup } from '../test-setup.js';
 
 describe('Memory-based Dataset Tests', () => {
     let mockMode = false;

@@ -1,7 +1,7 @@
 // Integration tests following netcdf4-python comprehensive examples
 
-import { Dataset, NetCDF4, NC_CONSTANTS } from '../index';
-import { TestSetup } from '../test-setup';
+import { Dataset, NetCDF4, NC_CONSTANTS } from '../index.js';
+import { TestSetup } from '../test-setup.js';
 
 describe('Integration Tests', () => {
     let mockMode = false;
