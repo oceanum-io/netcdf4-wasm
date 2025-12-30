@@ -2,8 +2,15 @@
   "name": "@oceanum/netcdf4-wasm",
   "version": "0.1.1",
   "description": "NetCDF4 library compiled to WebAssembly with TypeScript bindings",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
     "build": "npm run build:wasm && npm run build:js",
     "build:wasm": "bash scripts/build-wasm.sh",

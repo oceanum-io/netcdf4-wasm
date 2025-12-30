@@ -1,9 +1,9 @@
 // Main NetCDF4 class implementation
 
-import { Group } from './group';
-import { WasmModuleLoader } from './wasm-module';
-import { NC_CONSTANTS } from './constants';
-import type { NetCDF4Module, DatasetOptions, MemoryDatasetSource } from './types';
+import { Group } from './group.js';
+import { WasmModuleLoader } from './wasm-module.js';
+import { NC_CONSTANTS } from './constants.js';
+import type { NetCDF4Module, DatasetOptions, MemoryDatasetSource } from './types.js';
 
 export class NetCDF4 extends Group {
     private module: NetCDF4Module | null = null;

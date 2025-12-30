@@ -1,6 +1,6 @@
 // Test setup utilities following netcdf4-python patterns
 
-import { Dataset, NetCDF4, NC_CONSTANTS } from './index';
+import { Dataset, NetCDF4, NC_CONSTANTS } from './index.js';
 import * as fs from 'fs';
 import * as path from 'path';
 
