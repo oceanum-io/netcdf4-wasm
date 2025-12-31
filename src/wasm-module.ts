@@ -5,35 +5,28 @@ import type { NetCDF4Module } from "./types.js";
 
 export class WasmModuleLoader {
     static async loadModule(options: NetCDF4WasmOptions = {}): Promise<NetCDF4Module> {
-        try {
-            // Load the WASM module
-            let moduleFactory: any;
-            
-            if (typeof window !== 'undefined') {
-                // Browser environment
-                if (typeof NetCDF4Module === 'undefined') {
-                    throw new Error('NetCDF4Module not found. Make sure netcdf4.js is loaded.');
-                }
-                moduleFactory = NetCDF4Module;
-            } else {
-                // Node.js environment
-                const path = require('path');
-                const wasmPath = options.wasmPath || path.join(__dirname, '..', 'dist', 'netcdf4.js');
-                moduleFactory = require(wasmPath);
+        try {            
+            if (typeof window === 'undefined') {
+                throw new Error(
+                'NetCDF4-WASM only works in browser environments.'
+                );
+            }
+            if (!(window as any).NetCDF4Module) {
+                await import('./netcdf4.js');
             }
 
+            const moduleFactory = (window as any).NetCDF4Module;
+            if (!moduleFactory) {
+                throw new Error(
+                'NetCDF4Module not found after loading netcdf4.js.'
+                );
+            }
             const rawModule = await moduleFactory({
-                locateFile: (path: string) => {
-                    if (options.wasmPath) {
-                        const wasmPath = options.wasmPath.replace('.js', '.wasm');
-                        return wasmPath;
-                    }
-                    // For Node.js environment, provide absolute path to WASM file
-                    if (typeof window === 'undefined') {
-                        const path_module = require('path');
-                        return path_module.join(__dirname, '..', 'dist', 'netcdf4.wasm');
-                    }
-                    return path;
+                locateFile: (file: string) => {
+                if (file.endsWith('.wasm')) {
+                return './netcdf4.wasm';
+                }
+                return file;
                 }
             });
 
