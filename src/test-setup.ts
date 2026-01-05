@@ -1,5 +1,4 @@
 // Test setup utilities following netcdf4-python patterns
-
 import { Dataset, NetCDF4, NC_CONSTANTS } from './index.js';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -45,15 +44,14 @@ export class TestSetup {
         }
     }
 
-    // Mock WASM module for testing when real module isn't available
-    static mockWasmModule(): boolean {
-        if (typeof global.NetCDF4Module === 'undefined') {
-            global.NetCDF4Module = jest.fn().mockRejectedValue(
+    // Mock the WASM module loader for testing
+    static mockWasmModule(): void {
+        // Mock the dynamic import of netcdf4-wasm.js
+        jest.mock('./netcdf4-wasm.js', () => ({
+            default: jest.fn().mockRejectedValue(
                 new Error('NetCDF4Module not available in test environment')
-            );
-            return true; // Indicates we're in mock mode
-        }
-        return false; // Real module available
+            )
+        }));
     }
 
     // Create test data arrays

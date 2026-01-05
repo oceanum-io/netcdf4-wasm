@@ -458,6 +458,8 @@ check_command emcc netcdf_wrapper.c \
     -lnetcdf -lhdf5 -lhdf5_hl -lz \
     -s WASM=1 \
     -s MODULARIZE=1 \
+    -s EXPORT_ES6=1 \
+    -s ENVIRONMENT='web' \
     -s EXPORT_NAME="NetCDF4Module" \
     -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap","getValue","setValue","UTF8ToString","stringToUTF8","lengthBytesUTF8"]' \
     -s EXPORTED_FUNCTIONS='["_malloc","_free"]' \
@@ -466,16 +468,16 @@ check_command emcc netcdf_wrapper.c \
     --pre-js "$PROJECT_ROOT/bindings/pre.js" \
     --post-js "$PROJECT_ROOT/bindings/post.js" \
     -O2 \
-    -o "$DIST_DIR/netcdf4.js"
+    -o "$DIST_DIR/netcdf4-wasm.js"
 
 log "✅ WASM module created successfully!"
 
 # Verify build outputs
-if [ -f "$DIST_DIR/netcdf4.js" ] && [ -f "$DIST_DIR/netcdf4.wasm" ]; then
+if [ -f "$DIST_DIR/netcdf4-wasm.js" ] && [ -f "$DIST_DIR/netcdf4-wasm.wasm" ]; then
     log "✅ Build verification successful!"
     log "Built files:"
-    log "  - $DIST_DIR/netcdf4.js ($(du -h "$DIST_DIR/netcdf4.js" | cut -f1))"
-    log "  - $DIST_DIR/netcdf4.wasm ($(du -h "$DIST_DIR/netcdf4.wasm" | cut -f1))"
+    log "  - $DIST_DIR/netcdf4-wasm.js ($(du -h "$DIST_DIR/netcdf4-wasm.js" | cut -f1))"
+    log "  - $DIST_DIR/netcdf4-wasm.wasm ($(du -h "$DIST_DIR/netcdf4-wasm.wasm" | cut -f1))"
 else
     error_exit "WASM build files not found after compilation"
 fi

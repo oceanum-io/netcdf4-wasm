@@ -1,32 +1,27 @@
 // WASM module loading and wrapping functionality
 
-import type { EmscriptenModule, NetCDF4WasmOptions } from './types.js';
-import type { NetCDF4Module } from "./types.js";
+import type { EmscriptenModule, NetCDF4WasmOptions, NetCDF4Module } from './types.js';
 
 export class WasmModuleLoader {
     static async loadModule(options: NetCDF4WasmOptions = {}): Promise<NetCDF4Module> {
         try {            
             if (typeof window === 'undefined') {
                 throw new Error(
-                'NetCDF4-WASM only works in browser environments.'
+                    'NetCDF4-WASM only works in browser environments.'
                 );
-            }
-            if (!(window as any).NetCDF4Module) {
-                await import('./netcdf4.js');
             }
 
-            const moduleFactory = (window as any).NetCDF4Module;
-            if (!moduleFactory) {
-                throw new Error(
-                'NetCDF4Module not found after loading netcdf4.js.'
-                );
-            }
-            const rawModule = await moduleFactory({
+            // Dynamically import the generated netcdf4-wasm.js module
+            const netcdf4Module = await import('./netcdf4-wasm.js');
+            const createNetCDF4Module = netcdf4Module.default as (options?: any) => Promise<EmscriptenModule>;
+
+            // Use the imported module factory
+            const rawModule = await createNetCDF4Module({
                 locateFile: (file: string) => {
-                if (file.endsWith('.wasm')) {
-                return './netcdf4.wasm';
-                }
-                return file;
+                    if (file.endsWith('.wasm')) {
+                        return options.wasmPath || './netcdf4-wasm.wasm';
+                    }
+                    return file;
                 }
             });
 

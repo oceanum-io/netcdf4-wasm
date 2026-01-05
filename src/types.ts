@@ -62,6 +62,5 @@ export interface VariableOptions {
     chunksizes?: number[];
 }
 
-declare global {
-    function NetCDF4Module(options?: any): Promise<EmscriptenModule>;
-}
+// Type for the module factory function
+// export type NetCDF4ModuleFactory = (options?: any) => Promise<EmscriptenModule>;
