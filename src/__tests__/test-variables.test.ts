@@ -2,13 +2,14 @@
 
 import { Dataset, NetCDF4, Variable, NC_CONSTANTS } from '../index.js';
 import { TestSetup } from '../test-setup.js';
+import { mockMode } from '../test-setup.js';
 
 describe('Variable Tests', () => {
-    let mockMode = false;
+    // let mockMode = false;
 
     beforeAll(() => {
         TestSetup.setupTestEnvironment();
-        mockMode = TestSetup.mockWasmModule();
+        // mockMode = TestSetup.mockWasmModule();
     });
 
     afterAll(() => {

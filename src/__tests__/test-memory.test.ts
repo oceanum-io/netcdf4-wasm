@@ -2,13 +2,14 @@
 
 import { NetCDF4, Dataset, DatasetFromBlob, DatasetFromArrayBuffer, DatasetFromMemory } from '../index.js';
 import { TestSetup } from '../test-setup.js';
+import { mockMode } from '../test-setup.js';
 
 describe('Memory-based Dataset Tests', () => {
-    let mockMode = false;
+    // let mockMode = false;
 
     beforeAll(() => {
         TestSetup.setupTestEnvironment();
-        mockMode = TestSetup.mockWasmModule();
+        // mockMode = TestSetup.mockWasmModule();
     });
 
     afterAll(() => {

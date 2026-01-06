@@ -2,13 +2,12 @@
 
 import { Dataset, NetCDF4, Dimension, NC_CONSTANTS } from '../index.js';
 import { TestSetup } from '../test-setup.js';
+import { mockMode } from '../test-setup.js';
 
 describe('Dimension Tests', () => {
-    let mockMode = false;
-
     beforeAll(() => {
         TestSetup.setupTestEnvironment();
-        mockMode = TestSetup.mockWasmModule();
+        // mockMode = TestSetup.mockWasmModule();
     });
 
     afterAll(() => {

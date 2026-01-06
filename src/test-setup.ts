@@ -44,16 +44,7 @@ export class TestSetup {
         }
     }
 
-    // Mock the WASM module loader for testing
-    static mockWasmModule(): void {
-        // Mock the dynamic import of netcdf4-wasm.js
-        jest.mock('./netcdf4-wasm.js', () => ({
-            default: jest.fn().mockRejectedValue(
-                new Error('NetCDF4Module not available in test environment')
-            )
-        }));
-    }
-
+    
     // Create test data arrays
     static createTestData(shape: number[]): Float64Array {
         const size = shape.reduce((a, b) => a * b, 1);
@@ -89,3 +80,14 @@ export class TestSetup {
         }
     }
 }
+
+export const mockMode = (() => {
+    const g = globalThis as any;
+    if (typeof g.NetCDF4Module === 'undefined') {
+        g.NetCDF4Module = jest.fn().mockRejectedValue(
+            new Error('NetCDF4Module not available in test environment')
+        );
+        return true;
+    }
+    return false;
+})();

@@ -2,13 +2,14 @@
 
 import { Dataset, NetCDF4, NC_CONSTANTS, DATA_TYPE_MAP } from '../index.js';
 import { TestSetup } from '../test-setup.js';
+import { mockMode } from '../test-setup.js';
 
 describe('Data Types and Array Handling', () => {
-    let mockMode = false;
+    // let mockMode = false;
 
     beforeAll(() => {
         TestSetup.setupTestEnvironment();
-        mockMode = TestSetup.mockWasmModule();
+        // mockMode = TestSetup.mockWasmModule();
     });
 
     afterAll(() => {
