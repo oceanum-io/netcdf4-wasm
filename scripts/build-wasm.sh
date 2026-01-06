@@ -461,7 +461,8 @@ check_command emcc netcdf_wrapper.c \
     -s EXPORT_ES6=1 \
     -s ENVIRONMENT='web' \
     -s EXPORT_NAME="NetCDF4Module" \
-    -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap","getValue","setValue","UTF8ToString","stringToUTF8","lengthBytesUTF8"]' \
+    -s FORCE_FILESYSTEM=1 \
+    -s EXPORTED_RUNTIME_METHODS='["FS", "ccall","cwrap","getValue","setValue","UTF8ToString","stringToUTF8","lengthBytesUTF8"]' \
     -s EXPORTED_FUNCTIONS='["_malloc","_free"]' \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s INITIAL_MEMORY=16777216 \
