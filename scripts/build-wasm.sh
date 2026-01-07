@@ -84,7 +84,6 @@ apply_config_patches() {
         -e 's|/\* #undef SIZEOF_UINT \*/|#define SIZEOF_UINT 4|' \
         -e 's|/\* #undef SIZEOF_USHORT \*/|#define SIZEOF_USHORT 2|' \
         -e 's|/\* #undef SIZEOF___INT64 \*/|#define SIZEOF___INT64 8\n#define SIZEOF_UINT64_T 8\n#define SIZEOF_UINT64 8|' \
-        -DCMAKE_C_FLAGS="-s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_ES6=1 -s EXPORTED_RUNTIME_METHODS=['FS','cwrap','ccall']" \
         "$config_file"
 
     # Fix endianness
@@ -248,6 +247,7 @@ if [ ! -f "$INSTALL_DIR/lib/libhdf5.a" ]; then
     check_command emcmake cmake .. \
         -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
         -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_C_FLAGS="-s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_ES6=1 -s EXPORTED_RUNTIME_METHODS=['FS','cwrap','ccall']" \
         -DENABLE_FILEMAP=OFF \
         -DBUILD_SHARED_LIBS=OFF \
         -DHDF5_ENABLE_THREADSAFE=OFF \
