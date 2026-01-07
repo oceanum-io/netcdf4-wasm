@@ -34,6 +34,17 @@
     "scientific-computing"
   ],
   "author": "Oceanum.io",
+  "contributors": [
+    {
+      "name": "Lazaro Alonso",
+      "email": "lazarus.alon@gmail.com",
+      "url": "https://lazarusa.github.io"
+    },
+    {
+      "name": "Jeran Poehls",
+      "email": "jpoehls@bgc-jena.mpg.de"
+    }
+    ],
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^29.0.0",
