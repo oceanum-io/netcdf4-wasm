@@ -651,7 +651,7 @@ check_command emcc netcdf_wrapper.c \
     -s WASM=1 \
     -s MODULARIZE=1 \
     -s EXPORT_ES6=1 \
-    -s ENVIRONMENT='web' \
+    -s ENVIRONMENT=web,worker \
     -s EXPORT_NAME="NetCDF4Module" \
     -s FORCE_FILESYSTEM=1 \
     -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap","getValue","setValue","UTF8ToString","stringToUTF8","lengthBytesUTF8","FS","WORKERFS","cwrap","ccall","HEAP8","HEAP16","HEAP32","HEAPF32","HEAPF64","HEAP64","HEAPU8","HEAPU16","HEAPU32"]' \
