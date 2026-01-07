@@ -244,13 +244,12 @@ export class NetCDF4 extends Group {
     getGlobalAttributes(): Record<string, any> {
         const attributes: Record<string, any> = {};
         const module = this.module  
-        if (!module) return attributes;
+        if (!module) throw new Error("Failed to load module. Ensure module is initialized before calling methods")
         const nattsResult = module.nc_inq_natts(this.ncid);
         if (nattsResult.result !== NC_CONSTANTS.NC_NOERR) {
             throw new Error(`Failed to get number of global attributes (error: ${nattsResult.result})`);
         }
-        const nAtts = nattsResult.natts
-        if (!nAtts) return attributes;
+        const nAtts = nattsResult.natts as number
         const attNames = []
         for (let i=0; i < nAtts; i++){
             const name = this.getAttributeName(NC_CONSTANTS.NC_GLOBAL, i)
@@ -277,14 +276,14 @@ export class NetCDF4 extends Group {
 
     getAttributeValues(varid: number, attname: string): any {
         const module = this.module
-        if (!module) return;
+        if (!module) throw new Error("Failed to load module. Ensure module is initialized before calling methods")
         const attInfo = module.nc_inq_att(this.ncid, varid, attname);
         if (attInfo.result !== NC_CONSTANTS.NC_NOERR) {
             console.warn(`Failed to get attribute info for ${attname} (error: ${attInfo.result})`);
             return;
         }
         const attType = attInfo.type;
-        if (!attType) return;
+        if (!attType) throw new Error("Failed to allocate memory for attribute type.");
         let attValue;
         if (attType === 2) attValue = module.nc_get_att_text(this.ncid, varid, attname, attInfo.len as number);
         else if (attType === 3) attValue = module.nc_get_att_short(this.ncid, varid, attname, attInfo.len as number);
@@ -299,7 +298,7 @@ export class NetCDF4 extends Group {
 
     getDimCount(): number {    
         const module = this.module
-        if (!module) return 0;
+        if (!module) throw new Error("Failed to load module. Ensure module is initialized before calling methods")
         const result = module.nc_inq_ndims(this.ncid);
         if (result.result !== NC_CONSTANTS.NC_NOERR) {
             throw new Error(`Failed to get number of dimensions (error: ${result.result})`);
@@ -310,7 +309,7 @@ export class NetCDF4 extends Group {
     getVariables(): Record<string, any> {
         const variables:  Record<string, any> = {}; 
         const module = this.module
-        if (!module) return [];
+        if (!module) throw new Error("Failed to load module. Ensure module is initialized before calling methods")
         const varCount = this.getVarCount();
         const dimIds = this.getDimIDs()
         for (let varid = 0; varid < varCount; varid++) {
@@ -330,7 +329,7 @@ export class NetCDF4 extends Group {
 
     getVarIDs(): number[] | Int32Array {    
         const module = this.module
-        if (!module) return [];
+        if (!module) throw new Error("Failed to load module. Ensure module is initialized before calling methods")
         const result = module.nc_inq_varids(this.ncid);
         if (result.result !== NC_CONSTANTS.NC_NOERR) {
             throw new Error(`Failed to get variable IDs (error: ${result.result})`);
@@ -340,7 +339,7 @@ export class NetCDF4 extends Group {
 
     getDimIDs(): number[] | Int32Array {    
         const module = this.module
-        if (!module) return [];
+        if (!module) throw new Error("Failed to load module. Ensure module is initialized before calling methods")
         const result = module.nc_inq_dimids(this.ncid, 0);
         if (result.result !== NC_CONSTANTS.NC_NOERR) {
             throw new Error(`Failed to get dimension IDs (error: ${result.result})`);
@@ -350,14 +349,16 @@ export class NetCDF4 extends Group {
 
     getDim(dimid: number): Record<string, any> {
         const module = this.module
-        if (!module) return {};
+        if (!module) throw new Error("Failed to load module. Ensure module is initialized before calling methods")
         const result = module.nc_inq_dim(this.ncid, dimid);
         if (result.result !== NC_CONSTANTS.NC_NOERR) {
             throw new Error(`Failed to get dim (error: ${result.result})`);
         }
+        const varResult = module.nc_inq_varid(this.ncid, result.name as string) 
+        const varID = varResult.varid as number
         const {result:output, ...dim} = result
-        const unitResult = this.getAttributeValues(dimid, "units")
-        return {...dim, units:unitResult, id:dimid}; 
+        const unitResult = this.getAttributeValues(varID, "units")
+        return {...dim, units:unitResult, id:varID}; 
     }
 
     getDims(): Record<string, any> {
@@ -376,7 +377,7 @@ export class NetCDF4 extends Group {
 
     getVarCount(): number {    
         const module = this.module
-        if (!module) return 0;
+        if (!module) throw new Error("Failed to load module. Ensure module is initialized before calling methods")
         const result = module.nc_inq_nvars(this.ncid);
         if (result.result !== NC_CONSTANTS.NC_NOERR) {
             throw new Error(`Failed to get number of variables (error: ${result.result})`);
@@ -386,7 +387,7 @@ export class NetCDF4 extends Group {
 
     getAttributeName(varid:number, attId: number) : string | undefined {
         const module = this.module
-        if (!module) return;
+        if (!module) throw new Error("Failed to load module. Ensure module is initialized before calling methods")
         const result = module.nc_inq_attname(this.ncid, varid, attId);
         if (result.result !== NC_CONSTANTS.NC_NOERR) {
             throw new Error(`Failed to get attribute (error: ${result.result})`);
@@ -397,7 +398,8 @@ export class NetCDF4 extends Group {
     getVariableInfo(variable: number | string): Record<string, any>{
         const info: Record<string, any> = {}
         const module = this.module
-        if (!module) return info;
+        if (!module) throw new Error("Failed to load module. Ensure module is initialized before calling methods")
+
         const isId = typeof variable === "number"
         let varid = variable
         if (!isId){
@@ -409,9 +411,8 @@ export class NetCDF4 extends Group {
             throw new Error(`Failed to get variable info (error: ${result.result})`);
         }
         const typeMultiplier = DATA_TYPE_SIZE[result.type as number]
-        info["name"] = result.name
-        info["dtype"] = CONSTANT_DTYPE_MAP[result.type as number]
-        info['nctype'] = result.type
+
+        //Dim Info
         const dimids = result.dimids
         const dims = []
         const shape = []
@@ -424,10 +425,8 @@ export class NetCDF4 extends Group {
                 shape.push(dim.len)
             }
         }
-        info["shape"] = shape
-        info['dims'] = dims
-        info["size"] = size
-        info["totalSize"] = typeMultiplier * size
+        
+        //Attribute Info
         const attNames = []
         if (result.natts){
             for (let i = 0; i < result.natts; i++ ){
@@ -442,24 +441,36 @@ export class NetCDF4 extends Group {
                 atts[attname] = this.getAttributeValues(varid as number, attname)
             }
         }
-        info["attributes"] = atts
+
+        //Chunking Info
+        let chunks: number[];
         const chunkResult = module.nc_inq_var_chunking(this.ncid, varid as number);
-        if (chunkResult.result === NC_CONSTANTS.NC_NOERR){
-            const chunked = chunkResult.chunking === NC_CONSTANTS.NC_CHUNKED
-            info["chunked"] = chunked
-            if (chunked) {
-                info["chunks"] = chunkResult.chunkSizes
-            } else{
-                info["chunks"] = shape
-            }
+        const isChunked = chunkResult.chunking === NC_CONSTANTS.NC_CHUNKED
+        if (isChunked) {
+            chunks = chunkResult.chunkSizes as number[]
+        } else{
+            chunks = shape
         }
-        const chunkElements = info['chunks'].reduce((a: number, b: number) => a * b, 1)
+        const chunkElements = chunks.reduce((a: number, b: number) => a * b, 1)
+
+        //Output 
+        info["name"] = result.name
+        info["dtype"] = CONSTANT_DTYPE_MAP[result.type as number]
+        info['nctype'] = result.type
+        info["shape"] = shape
+        info['dims'] = dims
+        info["size"] = size
+        info["totalSize"] = size * typeMultiplier
+        info["attributes"] = atts
+        info["chunked"] = isChunked
+        info["chunks"] = chunks
         info["chunkSize"] = chunkElements * typeMultiplier
+
         return info;
     }
     getVariableArray(variable: number | string): Float32Array | Float64Array | Int16Array | Int32Array | BigInt64Array | BigInt[] | string[]  {
         const module = this.module
-        if (!module) return ["error"];
+        if (!module) throw new Error("Failed to load module. Ensure module is initialized before calling methods")
         const isId = typeof variable === "number"
         let varid = isId ? variable as number : 0
         if (!isId){
@@ -469,7 +480,7 @@ export class NetCDF4 extends Group {
         const info = this.getVariableInfo(varid)
         const arraySize = info.size
         const arrayType = info.nctype
-        if (!arrayType || !arraySize) return ["error"];
+        if (!arrayType || !arraySize) throw new Error("Failed to allocate memory for array")
         let arrayData;
         if (arrayType === 2) arrayData = module.nc_get_var_text(this.ncid, varid, arraySize);
         else if (arrayType === 3) arrayData = module.nc_get_var_short(this.ncid, varid, arraySize);
@@ -478,13 +489,13 @@ export class NetCDF4 extends Group {
         else if (arrayType === 5) arrayData = module.nc_get_var_float(this.ncid, varid, arraySize);
         else if (arrayType === 6) arrayData = module.nc_get_var_double(this.ncid, varid, arraySize);
         else arrayData = module.nc_get_var_double(this.ncid, varid, arraySize);
-        if (!arrayData.data) return ["error"]
+        if (!arrayData.data) throw new Error("Failed to read array data")
         return arrayData.data
     }
 
     getSlicedVariableArray(variable: number | string, start: number[], count: number[]): Float32Array | Float64Array | Int16Array | Int32Array | BigInt64Array | BigInt[] | string[] {
         const module = this.module
-        if (!module) return ["error"];
+        if (!module) throw new Error("Failed to load module. Ensure module is initialized before calling methods")
         const isId = typeof variable === "number"
         let varid = isId ? variable as number : 0
         if (!isId){
@@ -493,14 +504,14 @@ export class NetCDF4 extends Group {
         }
         const info = this.getVariableInfo(varid)
         const arrayType = info.nctype
-        
+        if (!arrayType) throw new Error("Failed to allocate memory for array")
         let arrayData;
         if (arrayType === 3) arrayData = module.nc_get_vara_short(this.ncid, varid, start, count);
         else if (arrayType === 4) arrayData = module.nc_get_vara_int(this.ncid, varid, start, count);
         else if (arrayType === 5) arrayData = module.nc_get_vara_float(this.ncid, varid, start, count);
         else if (arrayType === 6) arrayData = module.nc_get_vara_double(this.ncid, varid, start, count);
         else arrayData = module.nc_get_vara_double(this.ncid, varid, start, count);
-        if (!arrayData.data) return ["error"]
+        if (!arrayData.data) throw new Error("Failed to read array data")
         return arrayData.data
     }
 
