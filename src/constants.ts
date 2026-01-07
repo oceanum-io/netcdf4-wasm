@@ -43,7 +43,8 @@ export const DATA_TYPE_MAP: { [key: string]: number } = {
     'int': NC_CONSTANTS.NC_INT,
     'short': NC_CONSTANTS.NC_SHORT,
     'byte': NC_CONSTANTS.NC_BYTE,
-    'char': NC_CONSTANTS.NC_CHAR
+    'char': NC_CONSTANTS.NC_CHAR,
+    'longlong': NC_CONSTANTS.NC_LONGLONG
 };
 
 export const CONSTANT_DTYPE_MAP: { [key: number]: string } = {

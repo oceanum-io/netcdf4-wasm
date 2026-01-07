@@ -94,7 +94,7 @@ describe('Data Types and Array Handling', () => {
                 await nc.createDimension('x', 10);
                 
                 // Test invalid data types
-                const invalid_types = ['invalid', 'f16', 'i8', 'string', 'bool', '', null, undefined];
+                const invalid_types = ['invalid', 'f16', 'string', 'bool', '', null, undefined];
                 
                 for (const dtype of invalid_types) {
                     expect(async () => {

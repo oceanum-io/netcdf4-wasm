@@ -407,10 +407,9 @@ cat > netcdf_wrapper.c << 'EOF'
 #include <netcdf.h>
 #include <emscripten.h>
 
-// Export NetCDF functions to JavaScript
-
-//---- Base Open-Close functions ----//
-
+// =========================
+// NetCDF File Operations
+// =========================
 EMSCRIPTEN_KEEPALIVE
 int nc_open_wrapper(const char* path, int mode, int* ncidp) {
     return nc_open(path, mode, ncidp);
@@ -421,20 +420,67 @@ int nc_close_wrapper(int ncid) {
     return nc_close(ncid);
 }
 
-// Dimension inquiry functions
+EMSCRIPTEN_KEEPALIVE
+int nc_create_wrapper(const char* path, int mode, int* ncidp) {
+    return nc_create(path, mode, ncidp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_enddef_wrapper(int ncid) {
+    return nc_enddef(ncid);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_redef_wrapper(int ncid) {
+    return nc_redef(ncid);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_sync_wrapper(int ncid) {
+    return nc_sync(ncid);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_abort_wrapper(int ncid) {
+    return nc_abort(ncid);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_set_fill_wrapper(int ncid, int fillmode, int* old_modep) {
+    return nc_set_fill(ncid, fillmode, old_modep);
+}
+
+// =========================
+// Dimensions
+// =========================
+EMSCRIPTEN_KEEPALIVE
+int nc_def_dim_wrapper(int ncid, const char* name, size_t len, int* dimidp) {
+    return nc_def_dim(ncid, name, len, dimidp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_ndims_wrapper(int ncid, int* ndims) {
+    return nc_inq_ndims(ncid, ndims);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_unlimdim_wrapper(int ncid, int* unlimdimid) {
+    return nc_inq_unlimdim(ncid, unlimdimid);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_dimids_wrapper(int ncid, int* ndims, int* dimids, int include_parents) {
+    return nc_inq_dimids(ncid, ndims, dimids, include_parents);
+}
+
 EMSCRIPTEN_KEEPALIVE
 int nc_inq_dim_wrapper(int ncid, int dimid, char* name, size_t* lenp) {
     return nc_inq_dim(ncid, dimid, name, lenp);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_inq_dimid_wrapper(int ncid, const char* name, int* idp) {
-    return nc_inq_dimid(ncid, name, idp);
-}
-
-EMSCRIPTEN_KEEPALIVE
-int nc_show_metadata_wrapper(int ncid) {
-    return nc_show_metadata(ncid);
+int nc_inq_dimid_wrapper(int ncid, const char* name, int* dimidp) {
+    return nc_inq_dimid(ncid, name, dimidp);
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -448,30 +494,36 @@ int nc_inq_dimname_wrapper(int ncid, int dimid, char* name) {
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_inq_ndims_wrapper(int ncid, int* ndimsp) {
-    return nc_inq_ndims(ncid, ndimsp);
+int nc_rename_dim_wrapper(int ncid, int dimid, const char* name) {
+    return nc_rename_dim(ncid, dimid, name);
+}
+
+// =========================
+// Variables
+// =========================
+EMSCRIPTEN_KEEPALIVE
+int nc_def_var_wrapper(int ncid, const char* name, nc_type xtype, int ndims, const int* dimidsp, int* varidp) {
+    return nc_def_var(ncid, name, xtype, ndims, dimidsp, varidp);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_inq_unlimdim_wrapper(int ncid, int* unlimdimidp) {
-    return nc_inq_unlimdim(ncid, unlimdimidp);
+int nc_inq_nvars_wrapper(int ncid, int* nvars) {
+    return nc_inq_nvars(ncid, nvars);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_inq_dimids_wrapper(int ncid, int* ndimsp, int* dimidsp, int include_parents) {
-    return nc_inq_dimids(ncid, ndimsp, dimidsp, include_parents);
+int nc_inq_varids_wrapper(int ncid, int* nvars, int* varids) {
+    return nc_inq_varids(ncid, nvars, varids);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_inq_unlimdims_wrapper(int ncid, int* nunlimdimsp, int* unlimdimidsp) {
-    return nc_inq_unlimdims(ncid, nunlimdimsp, unlimdimidsp);
+int nc_inq_varid_wrapper(int ncid, const char* name, int* varidp) {
+    return nc_inq_varid(ncid, name, varidp);
 }
 
-//---- Variable inquiry functions ----//
-
 EMSCRIPTEN_KEEPALIVE
-int nc_inq_var_wrapper(int ncid, int varid, char* name, nc_type* xtypep, int* ndimsp, int* dimidsp, int* nattsp) {
-    return nc_inq_var(ncid, varid, name, xtypep, ndimsp, dimidsp, nattsp);
+int nc_inq_var_wrapper(int ncid, int varid, char* name, nc_type* xtypep, int* ndims, int* dimids, int* nattsp) {
+    return nc_inq_var(ncid, varid, name, xtypep, ndims, dimids, nattsp);
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -480,18 +532,18 @@ int nc_inq_varname_wrapper(int ncid, int varid, char* name) {
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_inq_vartype_wrapper(int ncid, int varid, nc_type* typep) {
-    return nc_inq_vartype(ncid, varid, typep);
+int nc_inq_vartype_wrapper(int ncid, int varid, nc_type* xtypep) {
+    return nc_inq_vartype(ncid, varid, xtypep);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_inq_varndims_wrapper(int ncid, int varid, int* ndimsp) {
-    return nc_inq_varndims(ncid, varid, ndimsp);
+int nc_inq_varndims_wrapper(int ncid, int varid, int* ndims) {
+    return nc_inq_varndims(ncid, varid, ndims);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_inq_vardimid_wrapper(int ncid, int varid, int* dimidsp) {
-    return nc_inq_vardimid(ncid, varid, dimidsp);
+int nc_inq_vardimid_wrapper(int ncid, int varid, int* dimids) {
+    return nc_inq_vardimid(ncid, varid, dimids);
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -500,18 +552,8 @@ int nc_inq_varnatts_wrapper(int ncid, int varid, int* nattsp) {
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_inq_varid_wrapper(int ncid, const char* name, int* varid) {
-    return nc_inq_varid(ncid, name, varid);
-}
-
-EMSCRIPTEN_KEEPALIVE
-int nc_inq_nvars_wrapper(int ncid, int* nvarsp) {
-    return nc_inq_nvars(ncid, nvarsp);
-}
-
-EMSCRIPTEN_KEEPALIVE
-int nc_inq_varids_wrapper(int ncid, int* nvarsp, int* varidsp) {
-    return nc_inq_varids(ncid, nvarsp, varidsp);
+int nc_rename_var_wrapper(int ncid, int varid, const char* name) {
+    return nc_rename_var(ncid, varid, name);
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -519,7 +561,48 @@ int nc_inq_var_chunking_wrapper(int ncid, int varid, int* storagep, size_t* chun
     return nc_inq_var_chunking(ncid, varid, storagep, chunksizesp);
 }
 
-//---- Attribute inquiry functions ----//
+EMSCRIPTEN_KEEPALIVE
+int nc_def_var_chunking_wrapper(int ncid, int varid, int storage, const size_t* chunksizesp) {
+    return nc_def_var_chunking(ncid, varid, storage, chunksizesp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_var_deflate_wrapper(int ncid, int varid, int* shufflep, int* deflatep, int* deflate_levelp) {
+    return nc_inq_var_deflate(ncid, varid, shufflep, deflatep, deflate_levelp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_def_var_deflate_wrapper(int ncid, int varid, int shuffle, int deflate, int deflate_level) {
+    return nc_def_var_deflate(ncid, varid, shuffle, deflate, deflate_level);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_var_fill_wrapper(int ncid, int varid, int* no_fill, void* fill_valuep) {
+    return nc_inq_var_fill(ncid, varid, no_fill, fill_valuep);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_def_var_fill_wrapper(int ncid, int varid, int no_fill, const void* fill_value) {
+    return nc_def_var_fill(ncid, varid, no_fill, fill_value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_var_endian_wrapper(int ncid, int varid, int* endianp) {
+    return nc_inq_var_endian(ncid, varid, endianp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_def_var_endian_wrapper(int ncid, int varid, int endian) {
+    return nc_def_var_endian(ncid, varid, endian);
+}
+
+// =========================
+// Attributes
+// =========================
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_natts_wrapper(int ncid, int* nattsp) {
+    return nc_inq_natts(ncid, nattsp);
+}
 
 EMSCRIPTEN_KEEPALIVE
 int nc_inq_att_wrapper(int ncid, int varid, const char* name, nc_type* xtypep, size_t* lenp) {
@@ -527,18 +610,13 @@ int nc_inq_att_wrapper(int ncid, int varid, const char* name, nc_type* xtypep, s
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_inq_attid_wrapper(int ncid, int varid, const char* name, int* idp) {
-    return nc_inq_attid(ncid, varid, name, idp);
+int nc_inq_attid_wrapper(int ncid, int varid, const char* name, int* attidp) {
+    return nc_inq_attid(ncid, varid, name, attidp);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_inq_attname_wrapper(int ncid, int varid, int attnum, char* name) {
-    return nc_inq_attname(ncid, varid, attnum, name);
-}
-
-EMSCRIPTEN_KEEPALIVE
-int nc_inq_natts_wrapper(int ncid, int* nattsp) {
-    return nc_inq_natts(ncid, nattsp);
+int nc_inq_attname_wrapper(int ncid, int varid, int attid, char* name) {
+    return nc_inq_attname(ncid, varid, attid, name);
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -557,6 +635,16 @@ int nc_get_att_text_wrapper(int ncid, int varid, const char* name, char* value) 
 }
 
 EMSCRIPTEN_KEEPALIVE
+int nc_get_att_uchar_wrapper(int ncid, int varid, const char* name, unsigned char* value) {
+    return nc_get_att_uchar(ncid, varid, name, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_att_schar_wrapper(int ncid, int varid, const char* name, signed char* value) {
+    return nc_get_att_schar(ncid, varid, name, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
 int nc_get_att_short_wrapper(int ncid, int varid, const char* name, short* value) {
     return nc_get_att_short(ncid, varid, name, value);
 }
@@ -564,6 +652,11 @@ int nc_get_att_short_wrapper(int ncid, int varid, const char* name, short* value
 EMSCRIPTEN_KEEPALIVE
 int nc_get_att_int_wrapper(int ncid, int varid, const char* name, int* value) {
     return nc_get_att_int(ncid, varid, name, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_att_long_wrapper(int ncid, int varid, const char* name, long* value) {
+    return nc_get_att_long(ncid, varid, name, value);
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -577,64 +670,304 @@ int nc_get_att_double_wrapper(int ncid, int varid, const char* name, double* val
 }
 
 EMSCRIPTEN_KEEPALIVE
+int nc_get_att_ushort_wrapper(int ncid, int varid, const char* name, unsigned short* value) {
+    return nc_get_att_ushort(ncid, varid, name, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_att_uint_wrapper(int ncid, int varid, const char* name, unsigned int* value) {
+    return nc_get_att_uint(ncid, varid, name, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
 int nc_get_att_longlong_wrapper(int ncid, int varid, const char* name, long long* value) {
     return nc_get_att_longlong(ncid, varid, name, value);
 }
 
-//---- Variable Getters ----//
-
-// Vara Getters - Used for expected plottable data we want to chunk/slice-up
-
 EMSCRIPTEN_KEEPALIVE
-int nc_get_vara_short_wrapper(int ncid, int varid, const size_t* startp, const size_t* countp, short* ip) {
-    return nc_get_vara_short(ncid, varid, startp, countp, ip);
+int nc_get_att_ulonglong_wrapper(int ncid, int varid, const char* name, unsigned long long* value) {
+    return nc_get_att_ulonglong(ncid, varid, name, value);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_get_vara_int_wrapper(int ncid, int varid, const size_t* startp, const size_t* countp, int* ip) {
-    return nc_get_vara_int(ncid, varid, startp, countp, ip);
+int nc_put_att_text_wrapper(int ncid, int varid, const char* name, size_t len, const char* value) {
+    return nc_put_att_text(ncid, varid, name, len, value);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_get_vara_float_wrapper(int ncid, int varid, const size_t* startp, const size_t* countp, float* ip) {
-    return nc_get_vara_float(ncid, varid, startp, countp, ip);
+int nc_put_att_short_wrapper(int ncid, int varid, const char* name, nc_type xtype, size_t len, const short* value) {
+    return nc_put_att_short(ncid, varid, name, xtype, len, value);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_get_vara_double_wrapper(int ncid, int varid, const size_t* startp, const size_t* countp, double* ip) {
-    return nc_get_vara_double(ncid, varid, startp, countp, ip);
-}
-
-//Var Getters - Used to grab entire data. All types since also used for dimension data
-
-EMSCRIPTEN_KEEPALIVE
-int nc_get_var_text_wrapper(int ncid, int varid, char* ip) {
-    return nc_get_var_text(ncid, varid, ip);
+int nc_put_att_int_wrapper(int ncid, int varid, const char* name, nc_type xtype, size_t len, const int* value) {
+    return nc_put_att_int(ncid, varid, name, xtype, len, value);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_get_var_short_wrapper(int ncid, int varid, short* ip) {
-    return nc_get_var_short(ncid, varid, ip);
+int nc_put_att_float_wrapper(int ncid, int varid, const char* name, nc_type xtype, size_t len, const float* value) {
+    return nc_put_att_float(ncid, varid, name, xtype, len, value);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_get_var_int_wrapper(int ncid, int varid, int* ip) {
-    return nc_get_var_int(ncid, varid, ip);
+int nc_put_att_double_wrapper(int ncid, int varid, const char* name, nc_type xtype, size_t len, const double* value) {
+    return nc_put_att_double(ncid, varid, name, xtype, len, value);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_get_var_longlong_wrapper(int ncid, int varid, long long* ip) {
-    return nc_get_var_longlong(ncid, varid, ip);
+int nc_del_att_wrapper(int ncid, int varid, const char* name) {
+    return nc_del_att(ncid, varid, name);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_get_var_float_wrapper(int ncid, int varid, float* ip) {
-    return nc_get_var_float(ncid, varid, ip);
+int nc_rename_att_wrapper(int ncid, int varid, const char* name, const char* newname) {
+    return nc_rename_att(ncid, varid, name, newname);
+}
+
+// =========================
+// Data Access (Reading)
+// =========================
+EMSCRIPTEN_KEEPALIVE
+int nc_get_vara_text_wrapper(int ncid, int varid, const size_t* start, const size_t* count, char* value) {
+    return nc_get_vara_text(ncid, varid, start, count, value);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_get_var_double_wrapper(int ncid, int varid, double* ip) {
-    return nc_get_var_double(ncid, varid, ip);
+int nc_get_vara_uchar_wrapper(int ncid, int varid, const size_t* start, const size_t* count, unsigned char* value) {
+    return nc_get_vara_uchar(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_vara_schar_wrapper(int ncid, int varid, const size_t* start, const size_t* count, signed char* value) {
+    return nc_get_vara_schar(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_vara_short_wrapper(int ncid, int varid, const size_t* start, const size_t* count, short* value) {
+    return nc_get_vara_short(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_vara_int_wrapper(int ncid, int varid, const size_t* start, const size_t* count, int* value) {
+    return nc_get_vara_int(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_vara_long_wrapper(int ncid, int varid, const size_t* start, const size_t* count, long* value) {
+    return nc_get_vara_long(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_vara_float_wrapper(int ncid, int varid, const size_t* start, const size_t* count, float* value) {
+    return nc_get_vara_float(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_vara_double_wrapper(int ncid, int varid, const size_t* start, const size_t* count, double* value) {
+    return nc_get_vara_double(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_vara_ushort_wrapper(int ncid, int varid, const size_t* start, const size_t* count, unsigned short* value) {
+    return nc_get_vara_ushort(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_vara_uint_wrapper(int ncid, int varid, const size_t* start, const size_t* count, unsigned int* value) {
+    return nc_get_vara_uint(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_vara_longlong_wrapper(int ncid, int varid, const size_t* start, const size_t* count, long long* value) {
+    return nc_get_vara_longlong(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_vara_ulonglong_wrapper(int ncid, int varid, const size_t* start, const size_t* count, unsigned long long* value) {
+    return nc_get_vara_ulonglong(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_var_text_wrapper(int ncid, int varid, char* value) {
+    return nc_get_var_text(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_var_uchar_wrapper(int ncid, int varid, unsigned char* value) {
+    return nc_get_var_uchar(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_var_schar_wrapper(int ncid, int varid, signed char* value) {
+    return nc_get_var_schar(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_var_short_wrapper(int ncid, int varid, short* value) {
+    return nc_get_var_short(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_var_int_wrapper(int ncid, int varid, int* value) {
+    return nc_get_var_int(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_var_long_wrapper(int ncid, int varid, long* value) {
+    return nc_get_var_long(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_var_float_wrapper(int ncid, int varid, float* value) {
+    return nc_get_var_float(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_var_double_wrapper(int ncid, int varid, double* value) {
+    return nc_get_var_double(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_var_ushort_wrapper(int ncid, int varid, unsigned short* value) {
+    return nc_get_var_ushort(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_var_uint_wrapper(int ncid, int varid, unsigned int* value) {
+    return nc_get_var_uint(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_var_longlong_wrapper(int ncid, int varid, long long* value) {
+    return nc_get_var_longlong(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_var_ulonglong_wrapper(int ncid, int varid, unsigned long long* value) {
+    return nc_get_var_ulonglong(ncid, varid, value);
+}
+
+// =========================
+// Data Writing
+// =========================
+EMSCRIPTEN_KEEPALIVE
+int nc_put_vara_text_wrapper(int ncid, int varid, const size_t* start, const size_t* count, const char* value) {
+    return nc_put_vara_text(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_vara_uchar_wrapper(int ncid, int varid, const size_t* start, const size_t* count, const unsigned char* value) {
+    return nc_put_vara_uchar(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_vara_schar_wrapper(int ncid, int varid, const size_t* start, const size_t* count, const signed char* value) {
+    return nc_put_vara_schar(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_vara_short_wrapper(int ncid, int varid, const size_t* start, const size_t* count, const short* value) {
+    return nc_put_vara_short(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_vara_int_wrapper(int ncid, int varid, const size_t* start, const size_t* count, const int* value) {
+    return nc_put_vara_int(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_vara_long_wrapper(int ncid, int varid, const size_t* start, const size_t* count, const long* value) {
+    return nc_put_vara_long(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_vara_float_wrapper(int ncid, int varid, const size_t* start, const size_t* count, const float* value) {
+    return nc_put_vara_float(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_vara_double_wrapper(int ncid, int varid, const size_t* start, const size_t* count, const double* value) {
+    return nc_put_vara_double(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_vara_ushort_wrapper(int ncid, int varid, const size_t* start, const size_t* count, const unsigned short* value) {
+    return nc_put_vara_ushort(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_vara_uint_wrapper(int ncid, int varid, const size_t* start, const size_t* count, const unsigned int* value) {
+    return nc_put_vara_uint(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_vara_longlong_wrapper(int ncid, int varid, const size_t* start, const size_t* count, const long long* value) {
+    return nc_put_vara_longlong(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_vara_ulonglong_wrapper(int ncid, int varid, const size_t* start, const size_t* count, const unsigned long long* value) {
+    return nc_put_vara_ulonglong(ncid, varid, start, count, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_var_text_wrapper(int ncid, int varid, const char* value) {
+    return nc_put_var_text(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_var_uchar_wrapper(int ncid, int varid, const unsigned char* value) {
+    return nc_put_var_uchar(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_var_schar_wrapper(int ncid, int varid, const signed char* value) {
+    return nc_put_var_schar(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_var_short_wrapper(int ncid, int varid, const short* value) {
+    return nc_put_var_short(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_var_int_wrapper(int ncid, int varid, const int* value) {
+    return nc_put_var_int(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_var_long_wrapper(int ncid, int varid, const long* value) {
+    return nc_put_var_long(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_var_float_wrapper(int ncid, int varid, const float* value) {
+    return nc_put_var_float(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_var_double_wrapper(int ncid, int varid, const double* value) {
+    return nc_put_var_double(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_var_ushort_wrapper(int ncid, int varid, const unsigned short* value) {
+    return nc_put_var_ushort(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_var_uint_wrapper(int ncid, int varid, const unsigned int* value) {
+    return nc_put_var_uint(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_var_longlong_wrapper(int ncid, int varid, const long long* value) {
+    return nc_put_var_longlong(ncid, varid, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_put_var_ulonglong_wrapper(int ncid, int varid, const unsigned long long* value) {
+    return nc_put_var_ulonglong(ncid, varid, value);
 }
 
 EOF
