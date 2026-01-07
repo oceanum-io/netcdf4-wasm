@@ -84,6 +84,7 @@ apply_config_patches() {
         -e 's|/\* #undef SIZEOF_UINT \*/|#define SIZEOF_UINT 4|' \
         -e 's|/\* #undef SIZEOF_USHORT \*/|#define SIZEOF_USHORT 2|' \
         -e 's|/\* #undef SIZEOF___INT64 \*/|#define SIZEOF___INT64 8\n#define SIZEOF_UINT64_T 8\n#define SIZEOF_UINT64 8|' \
+        -DCMAKE_C_FLAGS="-s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_ES6=1 -s EXPORTED_RUNTIME_METHODS=['FS','cwrap','ccall']" \
         "$config_file"
 
     # Fix endianness
@@ -407,6 +408,9 @@ cat > netcdf_wrapper.c << 'EOF'
 #include <emscripten.h>
 
 // Export NetCDF functions to JavaScript
+
+//---- Base Open-Close functions ----//
+
 EMSCRIPTEN_KEEPALIVE
 int nc_open_wrapper(const char* path, int mode, int* ncidp) {
     return nc_open(path, mode, ncidp);
@@ -417,24 +421,215 @@ int nc_close_wrapper(int ncid) {
     return nc_close(ncid);
 }
 
+// Dimension inquiry functions
 EMSCRIPTEN_KEEPALIVE
-int nc_create_wrapper(const char* path, int mode, int* ncidp) {
-    return nc_create(path, mode, ncidp);
+int nc_inq_dim_wrapper(int ncid, int dimid, char* name, size_t* lenp) {
+    return nc_inq_dim(ncid, dimid, name, lenp);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_def_dim_wrapper(int ncid, const char* name, size_t len, int* dimidp) {
-    return nc_def_dim(ncid, name, len, dimidp);
+int nc_inq_dimid_wrapper(int ncid, const char* name, int* idp) {
+    return nc_inq_dimid(ncid, name, idp);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_def_var_wrapper(int ncid, const char* name, nc_type xtype, int ndims, const int* dimidsp, int* varidp) {
-    return nc_def_var(ncid, name, xtype, ndims, dimidsp, varidp);
+int nc_show_metadata_wrapper(int ncid) {
+    return nc_show_metadata(ncid);
 }
 
 EMSCRIPTEN_KEEPALIVE
-int nc_put_var_double_wrapper(int ncid, int varid, const double* op) {
-    return nc_put_var_double(ncid, varid, op);
+int nc_inq_dimlen_wrapper(int ncid, int dimid, size_t* lenp) {
+    return nc_inq_dimlen(ncid, dimid, lenp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_dimname_wrapper(int ncid, int dimid, char* name) {
+    return nc_inq_dimname(ncid, dimid, name);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_ndims_wrapper(int ncid, int* ndimsp) {
+    return nc_inq_ndims(ncid, ndimsp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_unlimdim_wrapper(int ncid, int* unlimdimidp) {
+    return nc_inq_unlimdim(ncid, unlimdimidp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_dimids_wrapper(int ncid, int* ndimsp, int* dimidsp, int include_parents) {
+    return nc_inq_dimids(ncid, ndimsp, dimidsp, include_parents);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_unlimdims_wrapper(int ncid, int* nunlimdimsp, int* unlimdimidsp) {
+    return nc_inq_unlimdims(ncid, nunlimdimsp, unlimdimidsp);
+}
+
+//---- Variable inquiry functions ----//
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_var_wrapper(int ncid, int varid, char* name, nc_type* xtypep, int* ndimsp, int* dimidsp, int* nattsp) {
+    return nc_inq_var(ncid, varid, name, xtypep, ndimsp, dimidsp, nattsp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_varname_wrapper(int ncid, int varid, char* name) {
+    return nc_inq_varname(ncid, varid, name);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_vartype_wrapper(int ncid, int varid, nc_type* typep) {
+    return nc_inq_vartype(ncid, varid, typep);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_varndims_wrapper(int ncid, int varid, int* ndimsp) {
+    return nc_inq_varndims(ncid, varid, ndimsp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_vardimid_wrapper(int ncid, int varid, int* dimidsp) {
+    return nc_inq_vardimid(ncid, varid, dimidsp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_varnatts_wrapper(int ncid, int varid, int* nattsp) {
+    return nc_inq_varnatts(ncid, varid, nattsp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_varid_wrapper(int ncid, const char* name, int* varid) {
+    return nc_inq_varid(ncid, name, varid);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_nvars_wrapper(int ncid, int* nvarsp) {
+    return nc_inq_nvars(ncid, nvarsp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_varids_wrapper(int ncid, int* nvarsp, int* varidsp) {
+    return nc_inq_varids(ncid, nvarsp, varidsp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_var_chunking_wrapper(int ncid, int varid, int* storagep, size_t* chunksizesp) {
+    return nc_inq_var_chunking(ncid, varid, storagep, chunksizesp);
+}
+
+//---- Attribute inquiry functions ----//
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_att_wrapper(int ncid, int varid, const char* name, nc_type* xtypep, size_t* lenp) {
+    return nc_inq_att(ncid, varid, name, xtypep, lenp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_attid_wrapper(int ncid, int varid, const char* name, int* idp) {
+    return nc_inq_attid(ncid, varid, name, idp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_attname_wrapper(int ncid, int varid, int attnum, char* name) {
+    return nc_inq_attname(ncid, varid, attnum, name);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_natts_wrapper(int ncid, int* nattsp) {
+    return nc_inq_natts(ncid, nattsp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_atttype_wrapper(int ncid, int varid, const char* name, nc_type* xtypep) {
+    return nc_inq_atttype(ncid, varid, name, xtypep);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_attlen_wrapper(int ncid, int varid, const char* name, size_t* lenp) {
+    return nc_inq_attlen(ncid, varid, name, lenp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_att_text_wrapper(int ncid, int varid, const char* name, char* value) {
+    return nc_get_att_text(ncid, varid, name, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_att_short_wrapper(int ncid, int varid, const char* name, short* value) {
+    return nc_get_att_short(ncid, varid, name, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_att_int_wrapper(int ncid, int varid, const char* name, int* value) {
+    return nc_get_att_int(ncid, varid, name, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_att_float_wrapper(int ncid, int varid, const char* name, float* value) {
+    return nc_get_att_float(ncid, varid, name, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_att_double_wrapper(int ncid, int varid, const char* name, double* value) {
+    return nc_get_att_double(ncid, varid, name, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_att_longlong_wrapper(int ncid, int varid, const char* name, long long* value) {
+    return nc_get_att_longlong(ncid, varid, name, value);
+}
+
+//---- Variable Getters ----//
+
+// Vara Getters - Used for expected plottable data we want to chunk/slice-up
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_vara_short_wrapper(int ncid, int varid, const size_t* startp, const size_t* countp, short* ip) {
+    return nc_get_vara_short(ncid, varid, startp, countp, ip);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_vara_int_wrapper(int ncid, int varid, const size_t* startp, const size_t* countp, int* ip) {
+    return nc_get_vara_int(ncid, varid, startp, countp, ip);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_vara_float_wrapper(int ncid, int varid, const size_t* startp, const size_t* countp, float* ip) {
+    return nc_get_vara_float(ncid, varid, startp, countp, ip);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_vara_double_wrapper(int ncid, int varid, const size_t* startp, const size_t* countp, double* ip) {
+    return nc_get_vara_double(ncid, varid, startp, countp, ip);
+}
+
+//Var Getters - Used to grab entire data. All types since also used for dimension data
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_var_text_wrapper(int ncid, int varid, char* ip) {
+    return nc_get_var_text(ncid, varid, ip);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_var_short_wrapper(int ncid, int varid, short* ip) {
+    return nc_get_var_short(ncid, varid, ip);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_var_int_wrapper(int ncid, int varid, int* ip) {
+    return nc_get_var_int(ncid, varid, ip);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_var_longlong_wrapper(int ncid, int varid, long long* ip) {
+    return nc_get_var_longlong(ncid, varid, ip);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_var_float_wrapper(int ncid, int varid, float* ip) {
+    return nc_get_var_float(ncid, varid, ip);
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -442,10 +637,6 @@ int nc_get_var_double_wrapper(int ncid, int varid, double* ip) {
     return nc_get_var_double(ncid, varid, ip);
 }
 
-EMSCRIPTEN_KEEPALIVE
-int nc_enddef_wrapper(int ncid) {
-    return nc_enddef(ncid);
-}
 EOF
 
 # Compile to WASM
@@ -456,13 +647,14 @@ check_command emcc netcdf_wrapper.c \
     -I"$INSTALL_DIR/include" \
     -L"$INSTALL_DIR/lib" \
     -lnetcdf -lhdf5 -lhdf5_hl -lz \
+    -lworkerfs.js \
     -s WASM=1 \
     -s MODULARIZE=1 \
     -s EXPORT_ES6=1 \
     -s ENVIRONMENT='web' \
     -s EXPORT_NAME="NetCDF4Module" \
     -s FORCE_FILESYSTEM=1 \
-    -s EXPORTED_RUNTIME_METHODS='["FS", "ccall","cwrap","getValue","setValue","UTF8ToString","stringToUTF8","lengthBytesUTF8"]' \
+    -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap","getValue","setValue","UTF8ToString","stringToUTF8","lengthBytesUTF8","FS","WORKERFS","cwrap","ccall","HEAP8","HEAP16","HEAP32","HEAPF32","HEAPF64","HEAP64","HEAPU8","HEAPU16","HEAPU32"]' \
     -s EXPORTED_FUNCTIONS='["_malloc","_free"]' \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s INITIAL_MEMORY=16777216 \
