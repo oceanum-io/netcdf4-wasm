@@ -11,13 +11,13 @@ export class WasmModuleLoader {
             if (typeof window !== 'undefined') {
                 // Browser environment
                 if (typeof NetCDF4Module === 'undefined') {
-                    throw new Error('NetCDF4Module not found. Make sure netcdf4.js is loaded.');
+                    throw new Error('NetCDF4Module not found. Make sure netcdf4-module.js is loaded.');
                 }
                 moduleFactory = NetCDF4Module;
             } else {
                 // Node.js environment
                 const path = require('path');
-                const wasmPath = options.wasmPath || path.join(__dirname, '..', 'dist', 'netcdf4.js');
+                const wasmPath = options.wasmPath || path.join(__dirname, '..', 'dist', 'netcdf4-module.js');
                 moduleFactory = require(wasmPath);
             }
 
@@ -30,7 +30,7 @@ export class WasmModuleLoader {
                     // For Node.js environment, provide absolute path to WASM file
                     if (typeof window === 'undefined') {
                         const path_module = require('path');
-                        return path_module.join(__dirname, '..', 'dist', 'netcdf4.wasm');
+                        return path_module.join(__dirname, '..', 'dist', 'netcdf4-module.wasm');
                     }
                     return path;
                 }

@@ -13,8 +13,24 @@ This project provides a complete WebAssembly port of the NetCDF4 C library, enab
 
 ## Installation
 
+### NPM/Yarn (Node.js and bundlers)
+
 ```bash
 npm install netcdf4-wasm
+```
+
+### CDN (Browser)
+
+```html
+<!-- Load WASM module first -->
+<script src="https://unpkg.com/netcdf4-wasm@latest/dist/netcdf4-module.js"></script>
+<!-- Then UMD build (recommended for browser) -->
+<script src="https://unpkg.com/netcdf4-wasm@latest/dist/netcdf4-wasm.umd.min.js"></script>
+
+<!-- ES Module build -->
+<script type="module">
+  import { Dataset } from "https://unpkg.com/netcdf4-wasm@latest/dist/netcdf4-wasm.esm.js";
+</script>
 ```
 
 ## Prerequisites
@@ -43,6 +59,8 @@ npm run install-emscripten
 The JavaScript API is modeled closely on the [netcdf4-python](https://unidata.github.io/netcdf4-python) API.
 
 ### Basic Example
+
+#### ES Modules (Node.js, bundlers)
 
 ```typescript
 import { Dataset } from "netcdf4-wasm";
@@ -73,9 +91,9 @@ async function example() {
   times.calendar = "gregorian";
 
   // Set global attributes
-  nc.setncattr("description", "bogus example script");
-  nc.setncattr("history", "Created " + new Date().toISOString());
-  nc.setncattr("source", "netCDF4-wasm example");
+  nc.setAttr("description", "bogus example script");
+  nc.setAttr("history", "Created " + new Date().toISOString());
+  nc.setAttr("source", "netCDF4-wasm example");
 
   // Write data
   const tempData = new Float64Array(73 * 144);
@@ -85,6 +103,59 @@ async function example() {
   // Close the file
   await nc.close();
 }
+```
+
+#### Browser UMD (Global variable)
+
+```html
+<!-- Load WASM module first -->
+<script src="https://unpkg.com/netcdf4-wasm@latest/dist/netcdf4-module.js"></script>
+<!-- Then UMD build -->
+<script src="https://unpkg.com/netcdf4-wasm@latest/dist/netcdf4-wasm.umd.min.js"></script>
+<script>
+async function example() {
+  // Access via global NetCDF4WASM object
+  const { Dataset } = NetCDF4WASM;
+  
+  // Create a new NetCDF file
+  const nc = await Dataset(new ArrayBuffer(0), "w", { format: "NETCDF4" });
+
+  // Create dimensions
+  const lat = await nc.createDimension("lat", 73);
+  const lon = await nc.createDimension("lon", 144);
+  const time = await nc.createDimension("time", null); // unlimited dimension
+
+  // Create variables
+  const temp = await nc.createVariable("temperature", "f4", [
+    "time",
+    "lat",
+    "lon",
+  ]);
+
+  // Set variable attributes
+  temp.units = "Kelvin";
+  temp.long_name = "surface temperature";
+
+  // Set global attributes
+  nc.setAttr("description", "Created with UMD build");
+
+  // Write data
+  const tempData = new Float64Array(73 * 144);
+  tempData.fill(288.0); // Fill with 288K
+  await temp.setValue(tempData);
+
+  // Export as blob for download
+  const blob = await nc.toBlob();
+  await nc.close();
+  
+  // Create download link
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'example.nc';
+  a.click();
+}
+</script>
 ```
 
 ### Reading Files
@@ -114,8 +185,8 @@ async function readExample() {
   console.log("First few values:", data.slice(0, 5));
 
   // Access global attributes
-  console.log("Global attributes:", nc.ncattrs());
-  console.log("Description:", nc.getncattr("description"));
+  console.log("Global attributes:", nc.attrs());
+  console.log("Description:", nc.getAttr("description"));
 
   await nc.close();
 }
@@ -153,7 +224,7 @@ async function groupExample() {
   const temp = await forecasts.createVariable("temperature", "f4", ["time"]);
 
   // Set group attributes
-  forecasts.setncattr("description", "Forecast data");
+  forecasts.setAttr("description", "Forecast data");
 
   await nc.close();
 }
@@ -208,9 +279,9 @@ _Structure Definition_
 
 _Attribute Access_
 
-- `setncattr(name: string, value: any): void` - Set global attribute
-- `getncattr(name: string): any` - Get global attribute
-- `ncattrs(): string[]` - List all global attributes
+- `setAttr(name: string, value: any): void` - Set global attribute
+- `getAttr(name: string): any` - Get global attribute
+- `attrs(): string[]` - List all global attributes
 
 #### `Variable`
 
@@ -229,9 +300,9 @@ Represents a NetCDF variable, similar to Python's Variable class.
 
 - `getValue(): Promise<Float64Array>` - Read variable data
 - `setValue(data: Float64Array): Promise<void>` - Write variable data
-- `setncattr(name: string, value: any): void` - Set variable attribute
-- `getncattr(name: string): any` - Get variable attribute
-- `ncattrs(): string[]` - List variable attributes
+- `setAttr(name: string, value: any): void` - Set variable attribute
+- `getAttr(name: string): any` - Get variable attribute
+- `attrs(): string[]` - List variable attributes
 
 #### `Dimension`
 
@@ -286,6 +357,11 @@ This will:
 1. Download and compile zlib, HDF5, and NetCDF4 C libraries
 2. Create the WASM module with Emscripten
 3. Compile TypeScript bindings
+4. Build multiple output formats:
+   - UMD build for browsers (`dist/netcdf4-wasm.umd.js`)
+   - UMD minified for production (`dist/netcdf4-wasm.umd.min.js`)
+   - ES modules for bundlers (`dist/netcdf4-wasm.esm.js`)
+   - CommonJS for Node.js (`dist/index.js`)
 
 ### Clean build artifacts
 
@@ -338,6 +414,12 @@ netcdf4-wasm/
 │   └── post.js           # Post-run JavaScript
 ├── build/                 # Build artifacts (generated)
 ├── dist/                  # Distribution files (generated)
+│   ├── index.js          # CommonJS build
+│   ├── netcdf4-wasm.umd.js      # UMD build for browsers
+│   ├── netcdf4-wasm.umd.min.js  # UMD minified build
+│   └── netcdf4-wasm.esm.js      # ES modules build
+├── rollup.config.js       # Rollup bundler configuration
+├── tsconfig.rollup.json   # TypeScript config for Rollup
 └── package.json
 ```
 

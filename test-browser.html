@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NetCDF4 WASM Local Test</title>
+</head>
+<body>
+    <h1>NetCDF4 WASM Local Test</h1>
+    <div id="output"></div>
+    
+    <!-- Load local files -->
+    <script src="dist/netcdf4-module.js"></script>
+    <script src="dist/netcdf4-wasm.umd.min.js"></script>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(message) {
+            console.log(message);
+            output.innerHTML += `<p>${message}</p>`;
+        }
+        
+        async function testWASM() {
+            try {
+                log("Testing WASM module...");
+                
+                if (typeof NetCDF4Module === 'undefined') {
+                    log("ERROR: NetCDF4Module not found");
+                    return;
+                }
+                
+                log("NetCDF4Module found, initializing...");
+                const module = await NetCDF4Module({
+                    locateFile: function(path) {
+                        log(`Locating file: ${path}`);
+                        return `dist/${path}`;
+                    }
+                });
+                log("WASM module ready!");
+                
+                if (typeof NetCDF4WASM === 'undefined') {
+                    log("ERROR: NetCDF4WASM not found");
+                    return;
+                }
+                
+                log("NetCDF4WASM found!");
+                log("Available functions: " + Object.keys(NetCDF4WASM).join(', '));
+                
+                // Test creating a dataset in memory
+                const { Dataset } = NetCDF4WASM;
+                const dataset = await Dataset(new ArrayBuffer(1024), 'w');
+                log("Created in-memory dataset successfully!");
+                
+                await dataset.close();
+                log("Test completed successfully!");
+                
+            } catch (error) {
+                log(`ERROR: ${error.message}`);
+                console.error(error);
+            }
+        }
+        
+        window.addEventListener('load', testWASM);
+    </script>
+</body>
+</html>

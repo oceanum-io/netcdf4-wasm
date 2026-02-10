@@ -25,11 +25,29 @@ This library provides a complete implementation of NetCDF4 functionality with a 
 
 ### Installation
 
+#### NPM/Yarn (Node.js and bundlers)
+
 ```bash
 npm install netcdf4-wasm
 ```
 
+#### CDN (Browser)
+
+```html
+<!-- Load WASM module first -->
+<script src="https://unpkg.com/netcdf4-wasm@latest/dist/netcdf4-module.js"></script>
+<!-- Then UMD build (recommended for browser) -->
+<script src="https://unpkg.com/netcdf4-wasm@latest/dist/netcdf4-wasm.umd.min.js"></script>
+
+<!-- ES Module build -->
+<script type="module">
+  import { Dataset } from "https://unpkg.com/netcdf4-wasm@latest/dist/netcdf4-wasm.esm.js";
+</script>
+```
+
 ### Basic Usage
+
+#### ES Modules (Node.js, bundlers)
 
 ```javascript
 import { Dataset } from "netcdf4-wasm";
@@ -52,6 +70,35 @@ const temp = await dataset.variables.temperature.getValue();
 console.log("Temperature data:", temp);
 
 await dataset.close();
+```
+
+#### Browser UMD (Global variable)
+
+```html
+<!-- Load WASM module first -->
+<script src="https://unpkg.com/netcdf4-wasm@latest/dist/netcdf4-module.js"></script>
+<!-- Then UMD build -->
+<script src="https://unpkg.com/netcdf4-wasm@latest/dist/netcdf4-wasm.umd.min.js"></script>
+<script>
+async function loadNetCDF() {
+  // Access via global NetCDF4WASM object
+  const { Dataset } = NetCDF4WASM;
+  
+  // Load from URL
+  const response = await fetch("data.nc");
+  const buffer = await response.arrayBuffer();
+  const dataset = await Dataset(buffer, "r");
+  
+  // Read data
+  console.log("Variables:", Object.keys(dataset.variables));
+  const temp = await dataset.variables.temperature.getValue();
+  console.log("Temperature data:", temp);
+  
+  await dataset.close();
+}
+
+loadNetCDF();
+</script>
 ```
 
 ### Creating Data
@@ -142,6 +189,13 @@ Practical examples and use cases:
 - Node.js 14+ ✅
 - ES Modules ✅
 - CommonJS ✅
+
+### Build Formats
+
+- **UMD**: Universal build for browsers (`dist/netcdf4-wasm.umd.js`)
+- **UMD Minified**: Optimized for production (`dist/netcdf4-wasm.umd.min.js`)
+- **ES Modules**: For modern bundlers (`dist/netcdf4-wasm.esm.js`)
+- **CommonJS**: Node.js compatible (`dist/index.js`)
 
 ## Performance
 

@@ -1,22 +1,136 @@
 <html>
   <head>
-    <script src="https://unpkg.com/netcdf4-wasm@latest/dist/netcdf4.js"></script>
+    <title>NetCDF4 WASM Browser Example</title>
+    <!-- Load the WASM module first -->
+    <script src="https://unpkg.com/netcdf4-wasm@latest/dist/netcdf4-module.js"></script>
+    <!-- Then load the UMD build -->
+    <script src="https://unpkg.com/netcdf4-wasm@latest/dist/netcdf4-wasm.umd.min.js"></script>
   </head>
   <body>
+    <h1>NetCDF4 WASM Browser Example</h1>
+    <p>Select a NetCDF file to analyze:</p>
     <input type="file" id="netcdfFile" accept=".nc" />
+    <div id="output"></div>
+
     <script>
+      const output = document.getElementById("output");
+      let wasmReady = false;
+
+      function log(message) {
+        console.log(message);
+        output.innerHTML += `<p>${message}</p>`;
+      }
+
+      // Wait for the WASM module to be ready
+      async function waitForWasm() {
+        log("Checking for NetCDF4Module...");
+        
+        if (typeof NetCDF4Module !== 'undefined') {
+          log("NetCDF4Module found, initializing...");
+          try {
+            // NetCDF4Module is a factory function, call it to get the module instance
+            const moduleInstance = await NetCDF4Module({
+              locateFile: function(path) {
+                log(`WASM trying to locate file: ${path}`);
+                // For unpkg CDN, the WASM file should be in the same directory as the JS
+                const wasmUrl = `https://unpkg.com/netcdf4-wasm@latest/dist/${path}`;
+                log(`WASM file URL: ${wasmUrl}`);
+                return wasmUrl;
+              }
+            });
+            
+            wasmReady = true;
+            log("NetCDF4 WASM module loaded successfully!");
+            log(`Module functions available: ${Object.keys(moduleInstance).slice(0, 10).join(', ')}...`);
+            return true;
+          } catch (error) {
+            log(`Error initializing WASM: ${error.message}`);
+            console.error('WASM initialization error:', error);
+            return false;
+          }
+        } else {
+          log("NetCDF4Module not yet available, retrying...");
+          // Wait a bit and try again, but with a timeout
+          await new Promise(resolve => setTimeout(resolve, 500));
+          return waitForWasm();
+        }
+      }
+
+      // NetCDF4Module configuration is now handled in waitForWasm()
+
+      // Add error handlers
+      window.addEventListener('error', (e) => {
+        log(`Global error: ${e.error}`);
+        console.error('Global error:', e);
+      });
+
+      window.addEventListener('unhandledrejection', (e) => {
+        log(`Unhandled promise rejection: ${e.reason}`);
+        console.error('Unhandled rejection:', e);
+      });
+
+      // Initialize WASM when page loads
+      window.addEventListener('load', async () => {
+        output.innerHTML = "<p>Initializing NetCDF4 WASM module...</p>";
+        await waitForWasm();
+      });
+
       document
         .getElementById("netcdfFile")
         .addEventListener("change", async (event) => {
           const file = event.target.files[0];
           if (file) {
-            // File is a Blob - can be used directly
-            const dataset = await Dataset(file, "r");
+            try {
+              if (!wasmReady) {
+                output.innerHTML = "<p>WASM module not ready. Please wait...</p>";
+                await waitForWasm();
+              }
 
-            // Process the file...
-            console.log("Variables:", Object.keys(dataset.variables));
+              output.innerHTML = "<p>Loading NetCDF file...</p>";
 
-            await dataset.close();
+              // Access the global NetCDF4WASM object created by the UMD build
+              const { Dataset } = NetCDF4WASM;
+
+              // File is a Blob - can be used directly
+              const dataset = await Dataset(file, "r");
+
+              log(`File format: ${dataset.file_format}`);
+              log(`Dimensions: ${Object.keys(dataset.dimensions).join(", ")}`);
+              log(`Variables: ${Object.keys(dataset.variables).join(", ")}`);
+
+              // Show global attributes
+              const attrs = dataset.attrs();
+              if (attrs.length > 0) {
+                log(`Global attributes: ${attrs.join(", ")}`);
+                attrs.forEach((attr) => {
+                  log(`  ${attr}: ${dataset.getAttr(attr)}`);
+                });
+              }
+
+              // Show variable details
+              for (const varName of Object.keys(dataset.variables)) {
+                const variable = dataset.variables[varName];
+                log(
+                  `Variable "${varName}": ${
+                    variable.datatype
+                  }, dimensions: [${variable.dimensions.join(", ")}]`
+                );
+
+                // Show variable attributes
+                const varAttrs = variable.attrs();
+                if (varAttrs.length > 0) {
+                  varAttrs.forEach((attr) => {
+                    log(`    ${attr}: ${variable.getAttr(attr)}`);
+                  });
+                }
+              }
+
+              await dataset.close();
+              log("File processing complete!");
+            } catch (error) {
+              log(`Error: ${error.message}`);
+              console.error("NetCDF processing error:", error);
+            }
           }
         });
     </script>
