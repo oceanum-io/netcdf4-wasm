@@ -25,7 +25,14 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: npm
-      - run: npm ci
+      - name: Install dependencies
+        run: |
+          npm ci || {
+            echo "::group::npm debug log"
+            tail -n 250 ~/.npm/_logs/*-debug-0.log || true
+            echo "::endgroup::"
+            exit 1
+          }
       - run: npm test
 
   build:
@@ -37,7 +44,14 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      - run: npm ci
+      - name: Install dependencies
+        run: |
+          npm ci || {
+            echo "::group::npm debug log"
+            tail -n 250 ~/.npm/_logs/*-debug-0.log || true
+            echo "::endgroup::"
+            exit 1
+          }
       - run: npm run typecheck
       # Compile the TS API and roll up the browser bundles. This does not need
       # the WASM binary (it is loaded at runtime), so it verifies the JS build
