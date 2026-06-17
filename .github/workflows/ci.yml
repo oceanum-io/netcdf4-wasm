@@ -30,12 +30,15 @@ jobs:
           node --version
           npm --version
           free -h || true
-      - run: npm ci
+      - name: Install dependencies
+        run: |
+          npm ci; echo "npm ci raw exit code: $?"
+          echo "jest present:"; ls node_modules/.bin/jest 2>&1 || echo "JEST MISSING"
       - name: Show npm debug log
-        if: failure()
+        if: always()
         run: |
           echo "::group::npm debug logs"
-          tail -n 300 ~/.npm/_logs/*-debug-0.log || true
+          tail -n 300 ~/.npm/_logs/*-debug-0.log 2>&1 || true
           echo "::endgroup::"
       - run: npm test
 
