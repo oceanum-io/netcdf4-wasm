@@ -1,0 +1,36 @@
+name: "Build NetCDF4 WASM"
+description: >-
+  Set up Emscripten (cached) and build the NetCDF4 WASM module, caching the
+  compiled native libraries (zlib, HDF5, netcdf-c) so repeat builds are fast.
+
+runs:
+  using: "composite"
+  steps:
+    # The Emscripten SDK is large and rarely changes. Cache the whole emsdk dir;
+    # build-wasm.sh sources build/emsdk/emsdk_env.sh when present. Bump the key
+    # suffix to force a fresh SDK.
+    - name: Cache Emscripten SDK
+      id: cache-emsdk
+      uses: actions/cache@v4
+      with:
+        path: build/emsdk
+        key: emsdk-${{ runner.os }}-v1
+
+    - name: Install Emscripten SDK
+      if: steps.cache-emsdk.outputs.cache-hit != 'true'
+      shell: bash
+      run: bash scripts/install-emscripten.sh
+
+    # Cache the compiled static libs keyed on the build script. On a hit,
+    # build-wasm.sh sees the .a files and skips rebuilding zlib/HDF5/netcdf-c,
+    # compiling only the small wrapper. No restore-keys: when build-wasm.sh
+    # changes we WANT a full clean rebuild so the change is actually verified.
+    - name: Cache built native libraries
+      uses: actions/cache@v4
+      with:
+        path: build/install
+        key: wasm-install-${{ runner.os }}-${{ hashFiles('scripts/build-wasm.sh') }}
+
+    - name: Build WASM module
+      shell: bash
+      run: npm run build:wasm

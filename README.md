@@ -1,5 +1,8 @@
 # netcdf4-wasm
 
+[![CI](https://github.com/oceanum-io/netcdf4-wasm/actions/workflows/ci.yml/badge.svg)](https://github.com/oceanum-io/netcdf4-wasm/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/netcdf4-wasm.svg)](https://www.npmjs.com/package/netcdf4-wasm)
+
 NetCDF4 library compiled to WebAssembly with JavaScript/TypeScript bindings.
 
 ## Overview
@@ -431,6 +434,33 @@ netcdf4-wasm/
 4. Add tests for new functionality
 5. Run the test suite
 6. Submit a pull request
+
+## Continuous Integration & Releasing
+
+GitHub Actions workflows (`.github/workflows/`):
+
+| Workflow | Trigger | What it does |
+|----------|---------|--------------|
+| `ci.yml` | every push to `main` / PR to `main` | Runs the test suite (Node 18/20/22), typecheck, and the JS/UMD bundle build. No WASM needed (tests run against a mock module). |
+| `wasm-build.yml` | PRs/pushes that touch the build scripts, bindings, or C wrapper; manual | Builds the full emscripten WASM module (zlib + HDF5 + netcdf-c) and uploads it as an artifact. Caches the SDK and compiled libs so it only does the heavy work when build inputs change. |
+| `publish.yml` | pushing a `v*` tag | Verifies the tag matches `package.json`, runs tests, builds WASM + JS + bundles, and publishes to npm with provenance. |
+
+### Cutting a release
+
+1. Bump the version in `package.json` and commit.
+2. Tag and push:
+
+   ```bash
+   git tag v0.1.2
+   git push origin v0.1.2
+   ```
+
+The `publish.yml` workflow builds everything and publishes. It fails fast if the
+tag (`v0.1.2`) does not match the `package.json` version.
+
+> **Setup required:** add an `NPM_TOKEN` repository secret (Settings → Secrets and
+> variables → Actions). Use an npm **automation** token so it bypasses 2FA on
+> publish.
 
 ## License
 

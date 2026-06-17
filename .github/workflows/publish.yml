@@ -1,0 +1,54 @@
+name: Publish to npm
+
+# Publish on a version tag, e.g. `git tag v0.1.2 && git push origin v0.1.2`.
+# Requires an NPM_TOKEN repo secret (an npm automation token, which bypasses 2FA).
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # for npm provenance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Verify tag matches package.json version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          echo "Tag version: $TAG_VERSION / package.json: $PKG_VERSION"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag v$TAG_VERSION does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
+
+      - run: npm run typecheck
+      - run: npm test
+
+      - name: Build WASM module
+        uses: ./.github/actions/build-wasm
+
+      - name: Build JS + bundles
+        run: |
+          npm run build:js
+          npm run build:umd
+
+      # --ignore-scripts skips the prepublishOnly script, which runs `clean`
+      # (rm -rf dist build) and would wipe the artifacts built above plus the
+      # cached emsdk/native libs. The package is already fully built here.
+      - name: Publish
+        run: npm publish --provenance --access public --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
