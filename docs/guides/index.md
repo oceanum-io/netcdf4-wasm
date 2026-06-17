@@ -22,6 +22,7 @@ Comprehensive guides for getting started and mastering netcdf4-wasm.
 
 ## Advanced Features
 
+- [**Lazy File Reading**](lazy-reading) - Read large files without loading them entirely into memory
 - **Memory-based Operations** *(coming soon)* - Working with Blobs and ArrayBuffers
 - **Browser Integration** *(coming soon)* - File inputs, downloads, and web workflows
 - **Groups and Hierarchies** *(coming soon)* - Organizing data with NetCDF4 groups
@@ -88,6 +89,7 @@ const exportBlob = await dataset.toBlob();
 | Compression | ✅ Full | zlib, szip, etc. |
 | Groups | ✅ Full | Hierarchical organization |
 | Unlimited dimensions | ✅ Full | Growable dimensions |
+| Lazy reading | ✅ Full | Open without loading whole file (`{ lazy: true }`); browser needs a Web Worker |
 | String variables | 🚧 Partial | Basic support |
 | Parallel I/O | ❌ Not available | Single-threaded |
 | Advanced indexing | 🚧 Planned | Future release |
