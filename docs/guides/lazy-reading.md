@@ -32,8 +32,11 @@ import { Dataset } from 'netcdf4-wasm';
 // Browser: a File/Blob from an <input> — MUST run inside a Web Worker
 const dataset = await Dataset(file, 'r', { lazy: true });
 
+// Node.js: a file path — reads on demand via fs.readSync, no Worker needed
+const dataset = await Dataset('/data/big.nc', 'r', { lazy: true });
+
 const temp = await dataset.variables.temperature.getValue();
-await dataset.close();
+await dataset.close(); // releases the underlying file handle
 ```
 
 Lazy datasets are **read-only** (`mode: 'r'`).

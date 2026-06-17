@@ -38,6 +38,33 @@ describe("NetCDF4 lazy open path", () => {
     expect(nc.isopen).toBe(false);
   });
 
+  test("close() releases the lazy reader's handle", async () => {
+    let closed = false;
+    const reader = {
+      size: 64,
+      read: (offset: number, length: number) =>
+        new Uint8Array(Math.max(0, Math.min(offset + length, 64) - offset)),
+      close: () => {
+        closed = true;
+      },
+    };
+    const nc = await NetCDF4.fromLazy(reader, "r");
+    await nc.close();
+    expect(closed).toBe(true);
+  });
+
+  test("Dataset(path, 'r', { lazy: true }) routes to the lazy path", async () => {
+    const spy = jest
+      .spyOn(NetCDF4, "fromLazy")
+      .mockResolvedValue({} as unknown as NetCDF4);
+    try {
+      await Dataset("/data/big.nc", "r", { lazy: true });
+      expect(spy).toHaveBeenCalledWith("/data/big.nc", "r", { lazy: true });
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
   test("lazy Blob open never reads the whole file via arrayBuffer()", async () => {
     if (typeof Blob === "undefined") {
       return; // environment without Blob; routing is covered by fromLazy tests

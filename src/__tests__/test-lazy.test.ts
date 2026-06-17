@@ -268,6 +268,19 @@ describe("createLazyStreamOps", () => {
     expect(ops.read(stream, buffer, 0, 10, 995)).toBe(5);
   });
 
+  test("caps copied bytes at the requested length (heap safety)", () => {
+    // A misbehaving reader that returns more than asked must not overrun the
+    // libc-allotted buffer window.
+    const overReader: LazyReader = {
+      size: 1000,
+      read: () => new Uint8Array(5000),
+      close: () => {},
+    };
+    const overOps = createLazyStreamOps(overReader);
+    const buffer = new Uint8Array(20);
+    expect(overOps.read({ position: 0, node: {} }, buffer, 0, 10, 0)).toBe(10);
+  });
+
   test("write is rejected (read-only)", () => {
     expect(() => ops.write()).toThrow(/read-only/);
   });

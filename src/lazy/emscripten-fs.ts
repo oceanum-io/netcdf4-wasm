@@ -56,8 +56,12 @@ export function createLazyStreamOps(reader: LazyReader): LazyStreamOps {
     read(_stream, buffer, offset, length, position) {
       if (position >= reader.size || length <= 0) return 0;
       const bytes = reader.read(position, length);
-      buffer.set(bytes, offset);
-      return bytes.length;
+      // Defensively cap at `length`: libc only allotted `length` bytes at
+      // `offset`, so never write past it even if a reader violates its contract
+      // and returns more (that would corrupt adjacent WASM heap memory).
+      const n = Math.min(bytes.length, length);
+      buffer.set(n === bytes.length ? bytes : bytes.subarray(0, n), offset);
+      return n;
     },
     write() {
       throw new Error("Lazy NetCDF file is read-only");

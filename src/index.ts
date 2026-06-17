@@ -54,7 +54,10 @@ export async function Dataset(
 ): Promise<NetCDF4> {
   // Type detection and routing
   if (typeof source === "string") {
-    // File path
+    // File path. Lazy mode (Node) reads ranges on demand via a NodeFileReader.
+    if (options.lazy) {
+      return await NetCDF4.fromLazy(source, mode, options);
+    }
     return await NetCDF4.Dataset(source, mode, options);
   } else if (source instanceof Blob) {
     // Blob object

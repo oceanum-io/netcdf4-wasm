@@ -110,8 +110,7 @@ export class NetCDF4 extends Group {
     }
     const reader = createLazyReader(source);
     const virtualFilename =
-      filename ||
-      `/tmp/netcdf_lazy_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.nc`;
+      filename || NetCDF4.makeVirtualFilename("netcdf_lazy");
 
     const dataset = new NetCDF4(virtualFilename, mode, options);
     dataset.lazySource = { reader, filename: virtualFilename };
@@ -130,6 +129,12 @@ export class NetCDF4 extends Group {
     return NetCDF4.fromMemory(data, mode, options);
   }
 
+  // Build a unique virtual filename under /tmp for an in-memory or lazy mount.
+  private static makeVirtualFilename(prefix: string): string {
+    const rand = Math.random().toString(36).slice(2, 11);
+    return `/tmp/${prefix}_${Date.now()}_${rand}.nc`;
+  }
+
   // Create dataset from memory data (Uint8Array or ArrayBuffer)
   static async fromMemory(
     data: Uint8Array | ArrayBuffer,
@@ -146,9 +151,7 @@ export class NetCDF4 extends Group {
     }
 
     const uint8Data = data instanceof ArrayBuffer ? new Uint8Array(data) : data;
-    const virtualFilename =
-      filename ||
-      `/tmp/netcdf_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.nc`;
+    const virtualFilename = filename || NetCDF4.makeVirtualFilename("netcdf");
 
     const dataset = new NetCDF4(virtualFilename, mode, options);
     dataset.memorySource = {
@@ -235,6 +238,11 @@ export class NetCDF4 extends Group {
       await this.closeFile(this.ncid);
       this._isOpen = false;
       this.ncid = -1;
+    }
+    // Release the lazy reader's underlying handle (e.g. a Node file descriptor).
+    // Idempotent: backends guard against double-close.
+    if (this.lazySource) {
+      this.lazySource.reader.close();
     }
   }
 
