@@ -20,7 +20,7 @@ DEPS_DIR="$BUILD_DIR/deps"
 INSTALL_DIR="$BUILD_DIR/install"
 
 # Versions
-ZLIB_VERSION="1.3.1"
+ZLIB_VERSION="1.3.2"
 HDF5_VERSION="1.14.3"
 NETCDF_VERSION="4.9.2"
 
@@ -423,7 +423,8 @@ check_command emcc netcdf_wrapper.c \
     -s WASM=1 \
     -s MODULARIZE=1 \
     -s EXPORT_NAME="NetCDF4Module" \
-    -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap","getValue","setValue","UTF8ToString","stringToUTF8","lengthBytesUTF8","_malloc","_free"]' \
+    -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap","getValue","setValue","UTF8ToString","stringToUTF8","lengthBytesUTF8","_malloc","_free","FS"]' \
+    -s FORCE_FILESYSTEM=1 \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s INITIAL_MEMORY=16777216 \
     --pre-js "$PROJECT_ROOT/bindings/pre.js" \
