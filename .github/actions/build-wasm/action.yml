@@ -3,23 +3,39 @@ description: >-
   Set up Emscripten (cached) and build the NetCDF4 WASM module, caching the
   compiled native libraries (zlib, HDF5, netcdf-c) so repeat builds are fast.
 
+inputs:
+  emscripten-version:
+    description: "Pinned Emscripten SDK version to install and activate."
+    required: false
+    # Pinned for reproducibility (an unpinned 'latest' would change the toolchain
+    # with no commit). Bump deliberately; this also keys the SDK cache below.
+    default: "3.1.61"
+
 runs:
   using: "composite"
   steps:
-    # The Emscripten SDK is large and rarely changes. Cache the whole emsdk dir;
-    # build-wasm.sh sources build/emsdk/emsdk_env.sh when present. Bump the key
-    # suffix to force a fresh SDK.
+    # The SDK download/install is the slow part, so cache it and only install on
+    # a miss. The .emscripten config lives inside build/emsdk (so it's cached
+    # too), but we still activate every run below to be safe.
     - name: Cache Emscripten SDK
       id: cache-emsdk
       uses: actions/cache@v4
       with:
         path: build/emsdk
-        key: emsdk-${{ runner.os }}-v1
+        key: emsdk-${{ runner.os }}-${{ inputs.emscripten-version }}
 
     - name: Install Emscripten SDK
       if: steps.cache-emsdk.outputs.cache-hit != 'true'
       shell: bash
-      run: bash scripts/install-emscripten.sh
+      run: |
+        git clone https://github.com/emscripten-core/emsdk.git build/emsdk
+        ./build/emsdk/emsdk install "${{ inputs.emscripten-version }}"
+
+    # Always activate (offline, cheap): writes build/emsdk/.emscripten so emcc is
+    # configured regardless of whether the SDK came from cache or a fresh install.
+    - name: Activate Emscripten SDK
+      shell: bash
+      run: ./build/emsdk/emsdk activate "${{ inputs.emscripten-version }}"
 
     # Cache the compiled static libs keyed on the build script. On a hit,
     # build-wasm.sh sees the .a files and skips rebuilding zlib/HDF5/netcdf-c,
@@ -31,6 +47,8 @@ runs:
         path: build/install
         key: wasm-install-${{ runner.os }}-${{ hashFiles('scripts/build-wasm.sh') }}
 
+    # build-wasm.sh sources build/emsdk/emsdk_env.sh itself. This needs no
+    # node_modules (it just runs the bash build).
     - name: Build WASM module
       shell: bash
       run: npm run build:wasm
