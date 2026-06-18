@@ -1,0 +1,50 @@
+name: WASM Build
+
+# The emscripten build (zlib + HDF5 + netcdf-c from source) is heavy, so only
+# run it when something that affects the binary changes. Tests/typecheck for
+# ordinary PRs are handled by ci.yml and need no WASM binary.
+# (GitHub Actions does not support YAML anchors, so the paths list is repeated.)
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/build-wasm.sh"
+      - "scripts/install-emscripten.sh"
+      - "bindings/**"
+      - ".github/actions/build-wasm/action.yml"
+      - ".github/workflows/wasm-build.yml"
+  pull_request:
+    paths:
+      - "scripts/build-wasm.sh"
+      - "scripts/install-emscripten.sh"
+      - "bindings/**"
+      - ".github/actions/build-wasm/action.yml"
+      - ".github/workflows/wasm-build.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: wasm-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-wasm:
+    name: Build WASM module
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build WASM module
+        uses: ./.github/actions/build-wasm
+      - name: Verify build outputs
+        run: |
+          test -f dist/netcdf4-module.js
+          test -f dist/netcdf4-module.wasm
+      - uses: actions/upload-artifact@v4
+        with:
+          name: netcdf4-wasm-module
+          path: |
+            dist/netcdf4-module.js
+            dist/netcdf4-module.wasm
+          if-no-files-found: error
