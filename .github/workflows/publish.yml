@@ -1,7 +1,10 @@
 name: Publish to npm
 
-# Publish on a version tag, e.g. `git tag v0.1.2 && git push origin v0.1.2`.
-# Requires an NPM_TOKEN repo secret (an npm automation token, which bypasses 2FA).
+# Publish on a version tag, e.g. `git tag v0.2.0 && git push origin v0.2.0`.
+#
+# Uses npm Trusted Publishing (OIDC) — no NPM_TOKEN needed and it bypasses 2FA.
+# Requires a Trusted Publisher configured for this package on npmjs.com (linked
+# to this repo + this workflow), npm CLI >= 11.5.1, and Node >= 22.14.
 on:
   push:
     tags:
@@ -13,14 +16,21 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # for npm provenance
+      id-token: write # required for OIDC trusted publishing + provenance
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: "https://registry.npmjs.org"
           cache: npm
+
+      # Trusted publishing needs npm >= 11.5.1; ensure it regardless of the
+      # version bundled with the Node release.
+      - name: Ensure npm supports trusted publishing
+        run: |
+          npm install -g npm@latest
+          npm --version
 
       - run: npm ci
 
@@ -45,10 +55,9 @@ jobs:
           npm run build:js
           npm run build:umd
 
-      # --ignore-scripts skips the prepublishOnly script, which runs `clean`
-      # (rm -rf dist build) and would wipe the artifacts built above plus the
-      # cached emsdk/native libs. The package is already fully built here.
+      # Tokenless OIDC publish. Provenance is generated automatically under
+      # trusted publishing, so no --provenance flag and no NODE_AUTH_TOKEN.
+      # --ignore-scripts skips prepublishOnly (`clean` would wipe the artifacts
+      # built above); the package is already fully built here.
       - name: Publish
-        run: npm publish --provenance --access public --ignore-scripts
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --ignore-scripts
