@@ -458,9 +458,13 @@ GitHub Actions workflows (`.github/workflows/`):
 The `publish.yml` workflow builds everything and publishes. It fails fast if the
 tag (`v0.1.2`) does not match the `package.json` version.
 
-> **Setup required:** add an `NPM_TOKEN` repository secret (Settings → Secrets and
-> variables → Actions). Use an npm **automation** token so it bypasses 2FA on
-> publish.
+Publishing uses **npm Trusted Publishing (OIDC)** — no `NPM_TOKEN` secret, and it
+is not affected by account 2FA.
+
+> **Setup required (once):** on npmjs.com, configure a Trusted Publisher for the
+> `netcdf4-wasm` package linked to this repository and the `publish.yml` workflow
+> (Package → Settings → Trusted Publishers). The workflow already grants the
+> required `id-token: write` permission.
 
 ## License
 
