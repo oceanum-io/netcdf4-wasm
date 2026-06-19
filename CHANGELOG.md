@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.1] - 2026-06-20
+
+### Fixed
+- **Browser:** export `_malloc`/`_free` via `EXPORTED_FUNCTIONS`. They were
+  mis-placed in `EXPORTED_RUNTIME_METHODS`, so Emscripten never attached them to
+  the module — `Module._malloc` was `undefined` and the wrapper threw
+  `_malloc is not a function` on every read. Also export the `HEAPF64` view the
+  wrapper uses for bulk float64 I/O. NetCDF reads now work under bundlers
+  (Vite/webpack) and in the browser.
+
 ## [0.1.0] - 2024-12-17
 
 ### Added
