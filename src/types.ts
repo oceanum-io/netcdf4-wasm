@@ -56,6 +56,47 @@ export interface NetCDF4Module extends EmscriptenModule {
     size: number,
   ) => { result: number; data: Float64Array };
   nc_enddef: (ncid: number) => number;
+  nc_inq_ndims: (ncid: number) => { result: number; ndims: number };
+  nc_inq_unlimdim: (ncid: number) => { result: number; unlimdimid: number };
+  nc_inq_dim: (
+    ncid: number,
+    dimid: number,
+  ) => { result: number; name: string; len: number };
+  nc_inq_nvars: (ncid: number) => { result: number; nvars: number };
+  nc_inq_var: (
+    ncid: number,
+    varid: number,
+  ) => {
+    result: number;
+    name: string;
+    xtype: number;
+    ndims: number;
+    dimids: number[];
+    natts: number;
+  };
+  nc_inq_natts: (ncid: number) => { result: number; natts: number };
+  nc_inq_attname: (
+    ncid: number,
+    varid: number,
+    attnum: number,
+  ) => { result: number; name: string };
+  nc_inq_att: (
+    ncid: number,
+    varid: number,
+    name: string,
+  ) => { result: number; xtype: number; len: number };
+  nc_get_att_text: (
+    ncid: number,
+    varid: number,
+    name: string,
+    len: number,
+  ) => { result: number; text: string };
+  nc_get_att_double: (
+    ncid: number,
+    varid: number,
+    name: string,
+    len: number,
+  ) => { result: number; values: Float64Array };
 }
 
 export interface NetCDF4WasmOptions {

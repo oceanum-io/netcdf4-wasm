@@ -192,9 +192,11 @@ export class NetCDF4 extends Group {
       this.ncid = await this.openFile(this.filename, this.mode as any);
       (this as any).groupId = this.ncid;
 
-      // Load existing data from mock storage if in test mode
+      // Load the file's structure: mock storage in tests, the real file otherwise.
       if (typeof process !== "undefined" && process.env.NODE_ENV === "test") {
         (this as any).loadMockDimensions();
+      } else {
+        (this as any).loadFromFile();
       }
     }
 

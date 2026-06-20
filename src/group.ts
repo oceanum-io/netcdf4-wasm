@@ -3,8 +3,8 @@
 import type { NetCDF4 } from './netcdf4';
 import { Dimension } from './dimension';
 import { Variable } from './variable';
-import { NC_CONSTANTS, DATA_TYPE_MAP } from './constants';
-import type { VariableOptions } from './types';
+import { NC_CONSTANTS, DATA_TYPE_MAP, NC_TYPE_TO_STR } from './constants';
+import type { VariableOptions, NetCDF4Module } from './types';
 
 export class Group {
     public readonly dimensions: { [name: string]: Dimension } = {};
@@ -103,6 +103,63 @@ export class Group {
                     this.variables[name] = variable;
                 }
             }
+        }
+    }
+
+    // Load dimensions, variables and attributes from an opened real file.
+    public loadFromFile(): void {
+        const module = this.netcdf.getModule();
+        const ncid = this.groupId;
+
+        const ndimsRes = module.nc_inq_ndims(ncid);
+        if (ndimsRes.result !== NC_CONSTANTS.NC_NOERR) return;
+        const unlimdimid = module.nc_inq_unlimdim(ncid).unlimdimid;
+
+        const dimNames: string[] = [];
+        for (let dimid = 0; dimid < ndimsRes.ndims; dimid++) {
+            const d = module.nc_inq_dim(ncid, dimid);
+            if (d.result !== NC_CONSTANTS.NC_NOERR) continue;
+            dimNames[dimid] = d.name;
+            this.dimensions[d.name] = new Dimension(d.name, d.len, dimid === unlimdimid);
+        }
+
+        const nvars = module.nc_inq_nvars(ncid).nvars;
+        for (let varid = 0; varid < nvars; varid++) {
+            const v = module.nc_inq_var(ncid, varid);
+            if (v.result !== NC_CONSTANTS.NC_NOERR) continue;
+            const datatype = NC_TYPE_TO_STR[v.xtype] ?? 'f8';
+            const varDims = v.dimids
+                .map((id: number) => dimNames[id])
+                .filter((n: string | undefined): n is string => !!n);
+            const variable = new Variable(this.netcdf, v.name, datatype, varDims, varid, ncid);
+            this.loadAttributes(module, ncid, varid, v.natts, (n, val) => variable.setAttr(n, val));
+            this.variables[v.name] = variable;
+        }
+
+        const globalNatts = module.nc_inq_natts(ncid).natts;
+        this.loadAttributes(module, ncid, NC_CONSTANTS.NC_GLOBAL, globalNatts, (n, val) => this.setAttr(n, val));
+    }
+
+    private loadAttributes(
+        module: NetCDF4Module,
+        ncid: number,
+        varid: number,
+        natts: number,
+        set: (name: string, value: any) => void,
+    ): void {
+        for (let attnum = 0; attnum < natts; attnum++) {
+            const an = module.nc_inq_attname(ncid, varid, attnum);
+            if (an.result !== NC_CONSTANTS.NC_NOERR) continue;
+            const ai = module.nc_inq_att(ncid, varid, an.name);
+            if (ai.result !== NC_CONSTANTS.NC_NOERR) continue;
+            let value: any;
+            if (ai.xtype === NC_CONSTANTS.NC_CHAR) {
+                value = module.nc_get_att_text(ncid, varid, an.name, ai.len).text;
+            } else {
+                const r = module.nc_get_att_double(ncid, varid, an.name, ai.len);
+                value = ai.len === 1 ? r.values[0] : Array.from(r.values);
+            }
+            set(an.name, value);
         }
     }
 

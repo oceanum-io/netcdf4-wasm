@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0] - 2026-06-20
+
+### Added
+- **Read an existing file's structure.** Opening a file now populates
+  `dimensions`, `variables` (name, type, dimensions) and attributes (per-variable
+  and global) from the file, via new `nc_inq_ndims/dim/unlimdim/nvars/var/natts/
+  attname/att` and `nc_get_att_text/double` wrappers and a `Group.loadFromFile()`
+  that runs on open. Previously structure was only available when writing or in
+  test mode (the `dimensions`/`variables` maps came back empty for real files).
+- `Variable.getValue()` now reads any numeric type (read as double via NetCDF's
+  on-read conversion), not just float/double.
+
 ## [0.2.1] - 2026-06-20
 
 ### Fixed
