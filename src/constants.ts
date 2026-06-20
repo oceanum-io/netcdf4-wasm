@@ -39,3 +39,19 @@ export const DATA_TYPE_MAP: { [key: string]: number } = {
     'byte': NC_CONSTANTS.NC_BYTE,
     'char': NC_CONSTANTS.NC_CHAR
 };
+
+// Reverse map: NetCDF type code -> datatype token (for reading existing files).
+export const NC_TYPE_TO_STR: { [code: number]: string } = {
+    1: 'i1',   // NC_BYTE
+    2: 'S1',   // NC_CHAR
+    3: 'i2',   // NC_SHORT
+    4: 'i4',   // NC_INT
+    5: 'f4',   // NC_FLOAT
+    6: 'f8',   // NC_DOUBLE
+    7: 'u1',   // NC_UBYTE
+    8: 'u2',   // NC_USHORT
+    9: 'u4',   // NC_UINT
+    10: 'i8',  // NC_INT64
+    11: 'u8',  // NC_UINT64
+    12: 'S1',  // NC_STRING
+};

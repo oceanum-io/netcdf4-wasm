@@ -152,6 +152,16 @@ export class WasmModuleLoader {
     const nc_enddef_wrapper = module.cwrap("nc_enddef_wrapper", "number", [
       "number",
     ]);
+    const nc_inq_ndims_wrapper = module.cwrap("nc_inq_ndims_wrapper", "number", ["number", "number"]);
+    const nc_inq_unlimdim_wrapper = module.cwrap("nc_inq_unlimdim_wrapper", "number", ["number", "number"]);
+    const nc_inq_dim_wrapper = module.cwrap("nc_inq_dim_wrapper", "number", ["number", "number", "number", "number"]);
+    const nc_inq_nvars_wrapper = module.cwrap("nc_inq_nvars_wrapper", "number", ["number", "number"]);
+    const nc_inq_var_wrapper = module.cwrap("nc_inq_var_wrapper", "number", ["number", "number", "number", "number", "number", "number", "number"]);
+    const nc_inq_natts_wrapper = module.cwrap("nc_inq_natts_wrapper", "number", ["number", "number"]);
+    const nc_inq_attname_wrapper = module.cwrap("nc_inq_attname_wrapper", "number", ["number", "number", "number", "number"]);
+    const nc_inq_att_wrapper = module.cwrap("nc_inq_att_wrapper", "number", ["number", "number", "string", "number", "number"]);
+    const nc_get_att_text_wrapper = module.cwrap("nc_get_att_text_wrapper", "number", ["number", "number", "string", "number"]);
+    const nc_get_att_double_wrapper = module.cwrap("nc_get_att_double_wrapper", "number", ["number", "number", "string", "number"]);
 
     return {
       ...module,
@@ -232,6 +242,129 @@ export class WasmModuleLoader {
 
       nc_enddef: (ncid: number) => {
         return nc_enddef_wrapper(ncid);
+      },
+
+      nc_inq_ndims: (ncid: number) => {
+        const p = module._malloc(4);
+        const result = nc_inq_ndims_wrapper(ncid, p);
+        const ndims = module.getValue(p, "i32");
+        module._free(p);
+        return { result, ndims };
+      },
+
+      nc_inq_unlimdim: (ncid: number) => {
+        const p = module._malloc(4);
+        const result = nc_inq_unlimdim_wrapper(ncid, p);
+        const unlimdimid = module.getValue(p, "i32");
+        module._free(p);
+        return { result, unlimdimid };
+      },
+
+      nc_inq_dim: (ncid: number, dimid: number) => {
+        const namePtr = module._malloc(256);
+        const lenPtr = module._malloc(4);
+        const result = nc_inq_dim_wrapper(ncid, dimid, namePtr, lenPtr);
+        const name = module.UTF8ToString(namePtr);
+        const len = module.getValue(lenPtr, "i32");
+        module._free(namePtr);
+        module._free(lenPtr);
+        return { result, name, len };
+      },
+
+      nc_inq_nvars: (ncid: number) => {
+        const p = module._malloc(4);
+        const result = nc_inq_nvars_wrapper(ncid, p);
+        const nvars = module.getValue(p, "i32");
+        module._free(p);
+        return { result, nvars };
+      },
+
+      nc_inq_var: (ncid: number, varid: number) => {
+        const namePtr = module._malloc(256);
+        const xtypePtr = module._malloc(4);
+        const ndimsPtr = module._malloc(4);
+        const dimidsPtr = module._malloc(1024 * 4);
+        const nattsPtr = module._malloc(4);
+        const result = nc_inq_var_wrapper(
+          ncid,
+          varid,
+          namePtr,
+          xtypePtr,
+          ndimsPtr,
+          dimidsPtr,
+          nattsPtr,
+        );
+        const name = module.UTF8ToString(namePtr);
+        const xtype = module.getValue(xtypePtr, "i32");
+        const ndims = module.getValue(ndimsPtr, "i32");
+        const dimids: number[] = [];
+        for (let i = 0; i < ndims; i++) {
+          dimids.push(module.getValue(dimidsPtr + i * 4, "i32"));
+        }
+        const natts = module.getValue(nattsPtr, "i32");
+        module._free(namePtr);
+        module._free(xtypePtr);
+        module._free(ndimsPtr);
+        module._free(dimidsPtr);
+        module._free(nattsPtr);
+        return { result, name, xtype, ndims, dimids, natts };
+      },
+
+      nc_inq_natts: (ncid: number) => {
+        const p = module._malloc(4);
+        const result = nc_inq_natts_wrapper(ncid, p);
+        const natts = module.getValue(p, "i32");
+        module._free(p);
+        return { result, natts };
+      },
+
+      nc_inq_attname: (ncid: number, varid: number, attnum: number) => {
+        const namePtr = module._malloc(256);
+        const result = nc_inq_attname_wrapper(ncid, varid, attnum, namePtr);
+        const name = module.UTF8ToString(namePtr);
+        module._free(namePtr);
+        return { result, name };
+      },
+
+      nc_inq_att: (ncid: number, varid: number, name: string) => {
+        const xtypePtr = module._malloc(4);
+        const lenPtr = module._malloc(4);
+        const result = nc_inq_att_wrapper(ncid, varid, name, xtypePtr, lenPtr);
+        const xtype = module.getValue(xtypePtr, "i32");
+        const len = module.getValue(lenPtr, "i32");
+        module._free(xtypePtr);
+        module._free(lenPtr);
+        return { result, xtype, len };
+      },
+
+      nc_get_att_text: (
+        ncid: number,
+        varid: number,
+        name: string,
+        len: number,
+      ) => {
+        const valuePtr = module._malloc(len + 1);
+        const result = nc_get_att_text_wrapper(ncid, varid, name, valuePtr);
+        module.setValue(valuePtr + len, 0, "i8");
+        const text = module.UTF8ToString(valuePtr);
+        module._free(valuePtr);
+        return { result, text };
+      },
+
+      nc_get_att_double: (
+        ncid: number,
+        varid: number,
+        name: string,
+        len: number,
+      ) => {
+        const count = Math.max(len, 1);
+        const valuePtr = module._malloc(count * 8);
+        const result = nc_get_att_double_wrapper(ncid, varid, name, valuePtr);
+        const values = new Float64Array(
+          new Float64Array(module.HEAPF64.buffer, valuePtr, len),
+        );
+        module._free(valuePtr);
+        return { result, values };
       },
     };
   }

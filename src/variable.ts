@@ -79,20 +79,22 @@ export class Variable {
                         }
                     }
                 } else {
-                    actualSize = 1; // Default for unlimited dimension in real mode
+                    // Real file: nc_inq_dim already returned the current length.
+                    actualSize = dim.size > 0 ? dim.size : 1;
                 }
             }
             return acc * Math.max(actualSize, 1);
         }, 1);
 
-        if (this.datatype === 'f8' || this.datatype === 'double') {
-            return await this.netcdf.getVariableDouble(this.ncid, this.varid, totalSize);
-        } else if (this.datatype === 'f4' || this.datatype === 'float') {
-            // Convert from double to float32 for now (until we add proper float32 support)
-            const doubleData = await this.netcdf.getVariableDouble(this.ncid, this.varid, totalSize);
+        if (this.datatype === 'S1' || this.datatype === 'char') {
+            throw new Error(`Data type ${this.datatype} not yet supported`);
+        }
+        // NetCDF converts on read, so any numeric type can be read as double.
+        const doubleData = await this.netcdf.getVariableDouble(this.ncid, this.varid, totalSize);
+        if (this.datatype === 'f4' || this.datatype === 'float') {
             return new Float32Array(doubleData);
         }
-        throw new Error(`Data type ${this.datatype} not yet supported`);
+        return doubleData;
     }
 
     async setValue(data: Float64Array | Float32Array): Promise<void> {

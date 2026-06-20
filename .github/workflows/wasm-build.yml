@@ -41,6 +41,11 @@ jobs:
         run: |
           test -f dist/netcdf4-module.js
           test -f dist/netcdf4-module.wasm
+      - name: Read smoke test (real wasm)
+        run: |
+          npm ci
+          npm run build:js
+          node scripts/smoke-read.cjs
       - uses: actions/upload-artifact@v4
         with:
           name: netcdf4-wasm-module

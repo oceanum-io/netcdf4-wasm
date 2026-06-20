@@ -410,6 +410,56 @@ EMSCRIPTEN_KEEPALIVE
 int nc_enddef_wrapper(int ncid) {
     return nc_enddef(ncid);
 }
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_ndims_wrapper(int ncid, int* ndimsp) {
+    return nc_inq_ndims(ncid, ndimsp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_unlimdim_wrapper(int ncid, int* unlimdimidp) {
+    return nc_inq_unlimdim(ncid, unlimdimidp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_dim_wrapper(int ncid, int dimid, char* name, size_t* lenp) {
+    return nc_inq_dim(ncid, dimid, name, lenp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_nvars_wrapper(int ncid, int* nvarsp) {
+    return nc_inq_nvars(ncid, nvarsp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_var_wrapper(int ncid, int varid, char* name, int* xtypep, int* ndimsp, int* dimidsp, int* nattsp) {
+    return nc_inq_var(ncid, varid, name, (nc_type*)xtypep, ndimsp, dimidsp, nattsp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_natts_wrapper(int ncid, int* nattsp) {
+    return nc_inq_natts(ncid, nattsp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_attname_wrapper(int ncid, int varid, int attnum, char* name) {
+    return nc_inq_attname(ncid, varid, attnum, name);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_inq_att_wrapper(int ncid, int varid, const char* name, int* xtypep, size_t* lenp) {
+    return nc_inq_att(ncid, varid, name, (nc_type*)xtypep, lenp);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_att_text_wrapper(int ncid, int varid, const char* name, char* value) {
+    return nc_get_att_text(ncid, varid, name, value);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int nc_get_att_double_wrapper(int ncid, int varid, const char* name, double* value) {
+    return nc_get_att_double(ncid, varid, name, value);
+}
 EOF
 
 # Compile to WASM
