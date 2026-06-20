@@ -1,6 +1,6 @@
 {
   "name": "netcdf4-wasm",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "NetCDF4 library compiled to WebAssembly with TypeScript bindings",
   "main": "dist/index.js",
   "browser": "dist/netcdf4-wasm.umd.min.js",

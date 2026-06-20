@@ -423,7 +423,8 @@ check_command emcc netcdf_wrapper.c \
     -s WASM=1 \
     -s MODULARIZE=1 \
     -s EXPORT_NAME="NetCDF4Module" \
-    -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap","getValue","setValue","UTF8ToString","stringToUTF8","lengthBytesUTF8","_malloc","_free","FS"]' \
+    -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap","getValue","setValue","UTF8ToString","stringToUTF8","lengthBytesUTF8","FS","HEAPF64"]' \
+    -s EXPORTED_FUNCTIONS='["_malloc","_free"]' \
     -s FORCE_FILESYSTEM=1 \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s INITIAL_MEMORY=16777216 \
